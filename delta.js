@@ -22,7 +22,7 @@ function usage() {
     console.error("Usage: " + process.argv[0] + " " + process.argv[1] +
 		  " [-q|--quick] [--cmd COMMAND]" +
 		  " [--record FILE | --replay FILE]" +
-		  " [--errmsg ERRMSG] FILE [PREDICATE] OPTIONS...");
+		  " [--errmsg ERRMSG] [--msg MSG] FILE [PREDICATE] OPTIONS...");
     process.exit(-1);
 }
 
@@ -49,6 +49,9 @@ var /** only knock out entire statements */
 
     /** error message indicating failure of command */
     errmsg = null,
+
+    /** message indicating failure of command, either on stdout or stderr */
+    msg = null,
 
     /** file to minimise */
     file = null,
@@ -79,10 +82,16 @@ for(var i=2;i<process.argv.length;++i) {
     } else if(arg === '--timeout') {
 	console.warn("Timeout ignored.");
     } else if(arg === '--errmsg') {
-	if(errmsg === null)
-	    errmsg = String(process.argv[++i]);
-	else
-	    console.warn("More than one error message specified; ignoring.");
+        if(errmsg === null)
+            errmsg = String(process.argv[++i]);
+        else
+            console.warn("More than one error message specified; ignoring.");
+    } else if (arg === '--msg') {
+        if (msg === null) {
+            msg = String(process.argv[++i]);
+        } else {
+            console.warn("More than one message specified; ignoring.");
+        }
     } else if(arg === '--record') {
 	record = process.argv[++i];
 	if(fs.existsSync(record))
@@ -144,9 +153,11 @@ if(!predicate.test) {
 	}
 	
 	if(typeof predicate.checkResult !== 'function') {
-	    if(errmsg) {
+	    if(errmsg || msg) {
 		predicate.checkResult = function(error, stdout, stderr) {
-		    if(stderr && stderr.indexOf(errmsg) !== -1) {
+		    if((errmsg && stderr && stderr.indexOf(errmsg) !== -1) ||
+                (msg && ((stderr && stderr.indexOf(msg) !== -1) ||
+                    (stdout && stdout.indexOf(msg) !== -1)))) {
 			console.log("    aborted with relevant error");
 			return true;
 		    } else if(error) {

@@ -45,13 +45,13 @@ Finally, you can specify the predicate implicitly through command line arguments
 
 > --cmd CMD --errmsg ERR file-to-reduce.js
 
-takes `CMD` to be the command to execute; the predicate is deemed to hold if the command outputs an error message containing string `ERR`. Note that `CMD` is run with the minimized version of the input file as its only argument. If your command needs other arguments, you may need to write a wrapper script that invokes it with the right arguments.
+takes `CMD` to be the command to execute; the predicate is deemed to hold if the command outputs an error message (i.e., on stderr) containing string `ERR`. To check for a message on either stderr or stdout, use the `--msg` option instead.  Note that `CMD` is run with the minimized version of the input file as its only argument. If your command needs other arguments, you may need to write a wrapper script that invokes it with the right arguments.
 
 As a special case, you can run your analysis using the `timeout.sh` script bundled with JS Delta, which will output the error message `TIMEOUT` if the given timeout is exceeded; this can be detected by specifying `--errmsg TIMEOUT`.
 
-Finally, you can just specify a command (without providing the `--errmsg` flag), in which case the predicate is deemed to hold if the command exits with an error.
+Finally, you can just specify a command (without providing the `--errmsg` or `--msg` flags), in which case the predicate is deemed to hold if the command exits with an error.
 
 License
 -------
 
-JS Delta is distributed under the Eclipse Public License.  See the LICENSE.txt file in the root directory or <a href="http://www.eclipse.org/legal/epl-v10.html">http://www.eclipse.org/legal/epl-v10.html</a>.  
+JS Delta is distributed under the Eclipse Public License.  See the LICENSE.txt file in the root directory or <a href="http://www.eclipse.org/legal/epl-v10.html">http://www.eclipse.org/legal/epl-v10.html</a>.
