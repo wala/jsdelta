@@ -1,7 +1,7 @@
 JS Delta
 ==========
 
-JS Delta is a [delta debugger](http://www.st.cs.uni-saarland.de/dd/) for debugging JavaScript-processing tools.  Given a JavaScript program `test.js` that is causing a JS-processing tool to crash or otherwise misbehave, it shrinks `test.js` by deleting statements, functions and sub-expressions, looking for a small sub-program of `test.js` which still causes the problem.  In general, JS Delta can search for a small input satifying some predicate `P` implemented in JavaScript, allowing for arbitrarily complex tests.
+JS Delta is a [delta debugger](http://www.st.cs.uni-saarland.de/dd/) for debugging JavaScript-processing tools.  Given a JavaScript program `test.js` that is causing a JS-processing tool to crash or otherwise misbehave, it shrinks `test.js` by deleting statements, functions and sub-expressions, looking for a small sub-program of `test.js` which still causes the problem.  In general, JS Delta can search for a small input satisfying some predicate `P` implemented in JavaScript, allowing for arbitrarily complex tests.
 
 For example, `P` could invoke a static analysis like [WALA](http://wala.sf.net) on its input program and check whether it times out.  If `test.js` is very big, it may be hard to see what is causing the timeout.  JS Delta will find a (sometimes very much) smaller program on which the analysis still times out, making it easier to diagnose the root cause of the scalability problem. Special support for debugging WALA-based analyses with JS Delta is provided by the [WALADelta](http://github.com/wala/WALADelta) utility.
 
