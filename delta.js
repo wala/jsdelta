@@ -20,7 +20,7 @@ var fs = require("fs"),
 
 function usage() {
     console.error("Usage: " + process.argv[0] + " " + process.argv[1] +
-		  " [-q|--quick] [--cmd COMMAND]" +
+		  " [-q|--quick] [--fixpoint] [--cmd COMMAND]" +
 		  " [--record FILE | --replay FILE]" +
 		  " [--errmsg ERRMSG] [--msg MSG] FILE [PREDICATE] OPTIONS...");
     process.exit(-1);
@@ -43,6 +43,9 @@ function exists(f) {
 
 var /** only knock out entire statements */
     quick = false,
+
+    /** Repeat until a fixpoint is found */
+    findFixpoint = false,
 
     /** command to invoke to determine success/failure */
     cmd = null,
@@ -74,7 +77,9 @@ for(var i=2;i<process.argv.length;++i) {
     var arg = process.argv[i];
     if(arg === '--quick' || arg === '-q') {
 	quick = true;
-    } else if(arg === '--cmd') {
+    } else if(arg === '--fixpoint') {
+        findFixpoint = true;
+    }else if(arg === '--cmd') {
 	if(cmd === null)
 	    cmd = String(process.argv[++i]);
 	else
@@ -399,6 +404,7 @@ function writeTempFile() {
     return fn;
 }
 
+var  testSucceededAtLeastOnce = false;
 // test the current test case
 function test() {
     var fn = writeTempFile();
@@ -406,6 +412,7 @@ function test() {
     if(record)
 	fs.appendFileSync(record, !!res + "\n");
     if(res) {
+        testSucceededAtLeastOnce = true;
 	// if the test succeeded, save it to file 'smallest'
 	fs.writeFileSync(smallest, pp(ast));
 	return true;
@@ -425,9 +432,24 @@ var res = predicate.test(orig);
 if(record)
     fs.appendFileSync(record, !!res + "\n");
 if(res) {
-    minimise(ast, null, -1);
-    console.log("Minimisation finished; "
-		+ "final version is in " + smallest);
+    if(findFixpoint){
+        var iterations = 0;
+        do{
+            testSucceededAtLeastOnce = false;
+            console.log("Starting fixpoint iteration #%d", ++iterations);
+            minimise(ast, null, -1);
+        } while(testSucceededAtLeastOnce)
+    }else{
+        minimise(ast, null, -1);
+    }
+    var stats = fs.statSync(smallest);
+    if(stats.size < 2000){
+        // small enough to display
+        console.log();
+        console.log(fs.readFileSync(smallest, 'utf8'));
+        console.log();
+    }
+    console.log("Minimisation finished; final version is in %s (%d bytes)", smallest, stats.size);
     process.exit(0);
 } else {
     console.error("Original file doesn't satisfy predicate.");
