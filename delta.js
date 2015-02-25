@@ -342,8 +342,13 @@ function minimise(nd, parent, idx) {
 	    break;
 	case 'CallExpression':
 	case 'NewExpression':
-	    minimise(nd, 'callee');
-	    minimise_array(nd['arguments']);
+            if(nd.type === 'NewExpression' &&
+               Replace(parent, idx).With({type: 'CallExpression', callee: nd.callee, arguments: nd.arguments}) ){
+                minimise(parent, idx);
+            }else{
+	        minimise(nd, 'callee');
+	        minimise_array(nd['arguments']);
+            }
             break;	
 	case 'ArrayExpression':
 	    minimise_array(nd.elements, nd, 'elements');
@@ -353,6 +358,8 @@ function minimise(nd, parent, idx) {
 	    if(Replace(parent, idx).With(nd.consequent))
 		minimise(parent, idx);
 	    else if(nd.alternate && Replace(parent, idx).With(nd.alternate))
+		minimise(parent, idx);
+            else if(Replace(parent, idx).With(nd.test))
 		minimise(parent, idx);
 	    else {
 		minimise(nd, 'test');
@@ -364,13 +371,29 @@ function minimise(nd, parent, idx) {
 	    minimise(nd, 'discriminant');
 	    minimise_array(nd.cases);
 	    break;
+        case 'WhileStatement':
+            if(Replace(parent, idx).With(nd.body))
+		minimise(parent, idx);
+            else if(Replace(parent, idx).With(nd.test))
+		minimise(parent, idx);
+            else {
+	        minimise(nd, 'test');
+	        minimise(nd, 'body');
+            }
+            break;
 	case 'ForStatement':
 	    Replace(nd, 'test').With(null);
 	    Replace(nd, 'update').With(null);
-	    minimise(nd, 'init');
-	    minimise(nd, 'test');
-	    minimise(nd, 'update');
-	    minimise(nd, 'body');
+            if(Replace(parent, idx).With(nd.body))
+		minimise(parent, idx);
+            else if(nd.test && Replace(parent, idx).With(nd.test))
+		minimise(parent, idx);
+            else {
+	        minimise(nd, 'init');
+	        minimise(nd, 'test');
+	        minimise(nd, 'update');
+	        minimise(nd, 'body');
+            }
 	    break;
 	default:
 	    if(Array.isArray(nd)) {
