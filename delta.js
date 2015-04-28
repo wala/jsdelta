@@ -362,14 +362,9 @@ function minimise(nd, parent, idx) {
 	    break;
 	case 'CallExpression':
 	case 'NewExpression':
-            if(nd.type === 'NewExpression' &&
-               Replace(parent, idx).With({type: 'CallExpression', callee: nd.callee, arguments: nd.arguments}) ){
-                minimise(parent, idx);
-            }else{
 	        minimise(nd, 'callee');
 	        minimise_array(nd['arguments']);
-            }
-            break;	
+            break;
 	case 'ArrayExpression':
 	    minimise_array(nd.elements, nd, 'elements');
 	    break;
