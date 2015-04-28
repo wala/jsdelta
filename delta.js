@@ -15,7 +15,7 @@ var fs = require("fs"),
     esprima = require("esprima"),
     escodegen = require("escodegen"),
     estraverse = require("estraverse"),
-    execSync = require("execSync"),
+    cp = require("child_process"),
     config = require(__dirname + "/config.js");
 
 function usage() {
@@ -24,6 +24,21 @@ function usage() {
 		  " [--record FILE | --replay FILE]" +
 		  " [--errmsg ERRMSG] [--msg MSG] FILE [PREDICATE] OPTIONS...");
     process.exit(-1);
+}
+
+function execSync(cmd) {
+    if (cp.execSync) {
+        // node v0.12; use the built-in functionality
+        try {
+            cp.execSync(cmd);
+            return false;
+        } catch (e) {
+            return true;
+        }
+    } else {
+        // node v0.10; fall back on execSync package
+        return require("execSync").run(cmd);
+    }
 }
 
 function log_debug(msg) {
@@ -193,7 +208,7 @@ if(!predicate.test) {
 	    var start = new Date();
 	    var stdout_file = fn + ".stdout",
 	    stderr_file = fn + ".stderr";
-	    var error = execSync.run(predicate.cmd + " '" + fn + "'" +
+	    var error = execSync(predicate.cmd + " '" + fn + "'" +
 				     " >'" + stdout_file + "'" +
 				     " 2>'" + stderr_file + "'");
 	    var end = new Date();
