@@ -45,17 +45,6 @@ function log_debug(msg) {
     //console.log(msg);
 }
 
-// check whether the given file exists
-// TODO: this is a bit rough; surely someone has written a module to do this?
-function exists(f) {
-    try {
-	fs.statSync(f);
-	return true;
-    } catch(e) {
-	return false;
-    }
-}
-
 var /** only knock out entire statements */
     quick = false,
 
@@ -233,7 +222,7 @@ var ast = esprima.parse(src);
 
 // determine a suitable temporary directory
 var tmp_dir;
-for(i=0; exists(tmp_dir=config.tmp_dir+"/tmp"+i); ++i);
+for(i=0; fs.existsSync(tmp_dir=config.tmp_dir+"/tmp"+i); ++i);
     fs.mkdirSync(tmp_dir);
 
 // keep track of the number of attempts so far
