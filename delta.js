@@ -20,7 +20,7 @@ var fs = require("fs"),
 
 function usage() {
     console.error("Usage: " + process.argv[0] + " " + process.argv[1] +
-		  " [-q|--quick] [--fixpoint] [--cmd COMMAND]" +
+		  " [-q|--quick] [--no-fixpoint] [--cmd COMMAND]" +
 		  " [--record FILE | --replay FILE]" +
 		  " [--errmsg ERRMSG] [--msg MSG] FILE [PREDICATE] OPTIONS...");
     process.exit(-1);
@@ -60,7 +60,7 @@ var /** only knock out entire statements */
     quick = false,
 
     /** Repeat until a fixpoint is found */
-    findFixpoint = false,
+    findFixpoint = true,
 
     /** command to invoke to determine success/failure */
     cmd = null,
@@ -92,8 +92,8 @@ for(var i=2;i<process.argv.length;++i) {
     var arg = process.argv[i];
     if(arg === '--quick' || arg === '-q') {
 	quick = true;
-    } else if(arg === '--fixpoint') {
-        findFixpoint = true;
+    } else if(arg === '--no-fixpoint') {
+        findFixpoint = false;
     }else if(arg === '--cmd') {
 	if(cmd === null)
 	    cmd = String(process.argv[++i]);
