@@ -415,7 +415,9 @@ function minimise(nd, parent, idx) {
 		minimise_array(nd);
 	    } else {
 		estraverse.VisitorKeys[nd.type].forEach(function(ch) {
-		    minimise(nd, ch);
+            if (!quick || ch !== 'arguments') {
+                minimise(nd, ch);
+            }
 		});
 	    }
 	}
