@@ -414,10 +414,12 @@ function minimise(nd, parent, idx) {
 }
 
 function pp(ast) {
+    // we pass the 'parse' option here to avoid converting 0.0 to 0, etc.
     return escodegen.generate(ast, {
 	format: {
 	    json: ext === 'json'
-	}
+	},
+        parse: esprima.parse
     });
 }
 
