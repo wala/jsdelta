@@ -39,7 +39,7 @@ A slightly more convenient (but less general) way of writing a predicate is to i
   3. It invokes function `checkResult` with four arguments: the `error` code returned from executing `cmd` by the `exec` method [in the Node.js standard library](http://nodejs.org/api/child_process.html#child_process_child_process_exec_command_options_callback); a string containing the complete standard output of the command; a string containing the complete standard error of the command; and the time (in milliseconds) it took the command to finish.
   4. The (boolean) return value of `checkResult` is returned as the value of the predicate.
 
-Finally, you can specify the predicate implicitly through command line arguments: invoking JS Delta 
+Finally, you can specify the predicate implicitly through command line arguments: invoking JS Delta with arguments
 
 > jsdelta --cmd CMD --errmsg ERR file-to-reduce.js
 
