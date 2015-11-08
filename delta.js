@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /*******************************************************************************
  * Copyright (c) 2012 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
