@@ -50,6 +50,9 @@ function log_debug(msg) {
 var /** only knock out entire statements */
     quick = false,
 
+	/** Apply optimizing transformations to output */
+	optimize = false,
+
     /** Repeat until a fixpoint is found */
     findFixpoint = true,
 
@@ -83,6 +86,8 @@ for(var i=2;i<process.argv.length;++i) {
     var arg = process.argv[i];
     if(arg === '--quick' || arg === '-q') {
 	quick = true;
+    } else if(arg === '--optimize') {
+		optimize = true;
     } else if(arg === '--no-fixpoint') {
         findFixpoint = false;
     }else if(arg === '--cmd') {
@@ -140,6 +145,20 @@ predicate_args = process.argv.slice(i);
 // initialise predicate module
 if(typeof predicate.init === 'function')
     predicate.init(predicate_args);
+
+// initialize predicate transformations
+if(predicate.transformations === undefined){
+	predicate.transformations = [];
+}
+if(optimize){
+	function makeClosureCompilerTransformation(compilation_level){
+		return function(orig, transformed){
+			execSync(util.format("java -jar %s/node_modules/google-closure-compiler/compiler.jar --jscomp_off '*' --formatting PRETTY_PRINT --compilation_level %s --js %s --js_output_file %s", __dirname, compilation_level, orig, transformed));
+		}
+	}
+	predicate.transformations.push(makeClosureCompilerTransformation("ADVANCED_OPTIMIZATIONS"));
+	predicate.transformations.push(makeClosureCompilerTransformation("SIMPLE_OPTIMIZATIONS"));
+}
 
 // if no predicate module was specified, synthesise one from the other options
 if(!predicate.test) {
@@ -212,15 +231,6 @@ if(!predicate.test) {
 
 // figure out file extension; default is 'js'
 var ext = (file.match(/\.(\w+)$/) || [, 'js'])[1];
-
-var src = fs.readFileSync(file, 'utf-8');
-
-// hack to make JSON work
-if(ext === 'json')
-    src = '(' + src + ')';
-
-// parse given file
-var ast = esprima.parse(src);
 
 // determine a suitable temporary directory
 var tmp_dir;
@@ -448,27 +458,81 @@ function test() {
 	return false;
     }
 }
+/**
+ * Similar to test(), but a custom transformer is applied to the source first.
+ */
+function transformAndTest(transformation) {
+    var orig = writeTempFile();
+    try {
+		console.log("Transforming candidate %s", orig);
+        var transformed = getTempFileName();
+        transformation(orig, transformed);
+
+        // ensure termination of transformation fixpoint
+        var sizeOrig = fs.statSync(orig).size;
+        var sizeTransformed = fs.statSync(transformed).size;
+		var res = sizeTransformed + 8 /* sidestep padding choices */ < sizeOrig && predicate.test(transformed);
+        if (res) {
+            testSucceededAtLeastOnce = true;
+			// if the test succeeded, save it to file 'smallest'
+			fs.writeFileSync(smallest, fs.readFileSync(transformed));
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}
+/**
+ * Applies all the custom transformers.
+ */
+function applyTransformers() {
+	if (predicate.transformations) {
+		predicate.transformations.forEach(function (transformation) {
+			transformAndTest(transformation);
+		});
+	}
+}
+function rebuildAST(){
+	ast = esprima.parse(fs.readFileSync(smallest));
+}
 
 // save a copy of the original input
 var orig = getTempFileName(),
     input = fs.readFileSync(file, 'utf-8');
+
+// hack to make JSON work
+if(ext === 'json')
+	input = '(' + input + ')';
+
 fs.writeFileSync(orig, input);
 fs.writeFileSync(smallest, input);
 
 // get started
+var ast = undefined;
+rebuildAST();
 var res = predicate.test(orig);
 if(record)
     fs.appendFileSync(record, !!res + "\n");
 if(res) {
-    if(findFixpoint){
-        var iterations = 0;
-        do{
-            testSucceededAtLeastOnce = false;
-            console.log("Starting fixpoint iteration #%d", ++iterations);
-            minimise(ast, null, -1);
-        } while(testSucceededAtLeastOnce)
-    }else{
-        minimise(ast, null, -1);
+    var done = false;
+    var iterations = 0;
+    while (!done) {
+        console.log("Starting iteration #%d", iterations);
+        testSucceededAtLeastOnce = false;
+        iterations++;
+        done = true;
+
+		if(iterations === 1) {
+			applyTransformers();
+		}
+
+		rebuildAST();
+		minimise(ast, null, -1);
+
+		applyTransformers();
+
+        if (findFixpoint && testSucceededAtLeastOnce) {
+            done = false;
+        }
     }
     var stats = fs.statSync(smallest);
     if(stats.size < 2000){
@@ -489,7 +553,10 @@ function Replace(nd, idx) {
     return {
 	With: function(newval) {
 	    if(oldval === newval) {
-		return true;
+			return true;
+		}else if ((oldval === undefined || oldval === null) && (newval === undefined || newval === null)){
+			// avoids no-op transformation that makes us fail to reach a fix-point due to `testSucceededAtLeastOnce` changing without an actual source-change
+			return true;
 	    } else {
 		nd[idx] = newval;
 		if(test()) {
