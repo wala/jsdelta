@@ -466,7 +466,12 @@ function transformAndTest(transformation) {
     try {
 		console.log("Transforming candidate %s", orig);
         var transformed = getTempFileName();
-        transformation(orig, transformed);
+		try {
+			transformation(orig, transformed);
+		} catch (e) {
+			// ignore failures
+			return;
+		}
 
         // ensure termination of transformation fixpoint
         var sizeOrig = fs.statSync(orig).size;
