@@ -463,6 +463,12 @@ function test() {
  */
 function transformAndTest(transformation) {
     var orig = writeTempFile();
+
+	function getFileCodeSize(sourceFile) {
+		// The only reliable way of comparing transformed code sizes is to pretty print them in the same way
+		return pp(esprima.parse(fs.readFileSync(sourceFile))).length;
+	}
+
     try {
 		console.log("Transforming candidate %s", orig);
         var transformed = getTempFileName();
@@ -474,9 +480,8 @@ function transformAndTest(transformation) {
 		}
 
         // ensure termination of transformation fixpoint
-        var sizeOrig = fs.statSync(orig).size;
-        var sizeTransformed = fs.statSync(transformed).size;
-		var res = sizeTransformed + 8 /* sidestep padding choices */ < sizeOrig && predicate.test(transformed);
+		var reducedSize = getFileCodeSize(transformed) < getFileCodeSize(orig);
+        var res = reducedSize && predicate.test(transformed);
         if (res) {
             testSucceededAtLeastOnce = true;
 			// if the test succeeded, save it to file 'smallest'
