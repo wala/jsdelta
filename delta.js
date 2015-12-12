@@ -12,7 +12,7 @@
  *     Max Schaefer    - refactoring
  *******************************************************************************/
 
-var fs = require("fs"),
+var fs = require("fs-extra"),
     util = require("util"),
     esprima = require("esprima"),
     escodegen = require("escodegen"),
@@ -278,7 +278,7 @@ function minimise_array(array, nonempty) {
 		    var removed = array.splice(lo, hi-lo);
 		    if(!test()) {
 			// didn't work, need to put it back
-			Array.prototype.splice.apply(array, 
+			Array.prototype.splice.apply(array,
 						     [lo,0].concat(removed));
 		    }
 		}
@@ -312,8 +312,12 @@ function minimise(nd, parent, idx) {
 	// if we end up with a single statement, replace the block with
 	// that statement
 	minimise_array(nd.body);
-	if(!quick && nd.body.length === 1)
-	    Replace(parent, idx).With(nd.body[0]);
+	if(!quick && nd.body.length === 1) {
+		if(parent.type !== 'TryStatement' && parent.type !== 'CatchClause') {
+			// skip block containers that have mandatory blocks
+			Replace(parent, idx).With(nd.body[0]);
+		}
+	}
 	break;
     case 'FunctionDeclaration':
     case 'FunctionExpression':
@@ -472,20 +476,21 @@ function transformAndTest(transformation) {
     try {
 		console.log("Transforming candidate %s", orig);
         var transformed = getTempFileName();
-		try {
-			transformation(orig, transformed);
-		} catch (e) {
-			// ignore failures
-			return;
-		}
+        try {
+            transformation(orig, transformed);
 
-        // ensure termination of transformation fixpoint
-		var reducedSize = getFileCodeSize(transformed) < getFileCodeSize(orig);
-        var res = reducedSize && predicate.test(transformed);
-        if (res) {
-            testSucceededAtLeastOnce = true;
-			// if the test succeeded, save it to file 'smallest'
-			fs.writeFileSync(smallest, fs.readFileSync(transformed));
+            // ensure termination of transformation fixpoint
+            var reducedSize = getFileCodeSize(transformed) < getFileCodeSize(orig);
+            var res = reducedSize && predicate.test(transformed);
+            if (res) {
+                testSucceededAtLeastOnce = true;
+                // if the test succeeded, save it to file 'smallest'
+                copy(transformed, smallest);
+            }
+        } catch (e) {
+            // ignore failures - assume they were a no-op
+            copy(orig, transformed);
+            return;
         }
     } catch (e) {
         console.error(e);
@@ -501,20 +506,27 @@ function applyTransformers() {
 		});
 	}
 }
+
+function copy(from, to){
+    fs.copySync(from, to);
+}
+
 function rebuildAST(){
 	ast = esprima.parse(fs.readFileSync(smallest));
 }
 
 // save a copy of the original input
-var orig = getTempFileName(),
-    input = fs.readFileSync(file, 'utf-8');
+var orig = getTempFileName();
 
 // hack to make JSON work
-if(ext === 'json')
-	input = '(' + input + ')';
-
-fs.writeFileSync(orig, input);
-fs.writeFileSync(smallest, input);
+if(ext === 'json') {
+    var input = fs.readFileSync(file, 'utf-8');
+    input = '(' + input + ')';
+    fs.writeFileSync(orig, input);
+} else {
+    copy(file, orig);
+}
+copy(orig, smallest);
 
 // get started
 var ast = undefined;
