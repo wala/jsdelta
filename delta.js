@@ -151,9 +151,10 @@ if(predicate.transformations === undefined){
 	predicate.transformations = [];
 }
 if(optimize){
+	var closureCompilerJar = require('google-closure-compiler').compiler.jar_path;
 	function makeClosureCompilerTransformation(compilation_level){
 		return function(orig, transformed){
-			execSync(util.format("java -jar %s/node_modules/google-closure-compiler/compiler.jar --jscomp_off '*' --formatting PRETTY_PRINT --compilation_level %s --js %s --js_output_file %s", __dirname, compilation_level, orig, transformed));
+			execSync(util.format("java -jar %s --jscomp_off '*' --formatting PRETTY_PRINT --compilation_level %s --js %s --js_output_file %s", closureCompilerJar, compilation_level, orig, transformed));
 		}
 	}
 	predicate.transformations.push(makeClosureCompilerTransformation("ADVANCED_OPTIMIZATIONS"));
