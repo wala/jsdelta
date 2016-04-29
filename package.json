@@ -4,9 +4,9 @@
     "author": "Max Schaefer <xiemaisi@gmail.com>",
     "description": "A delta debugger for JavaScript",
     "dependencies" : {
-      "escodegen": "1.6.1",
-      "esprima": "2.2.0",
-      "estraverse": "4.0.0",
+      "escodegen": "1.8.0",
+      "esprima": "2.7.2",
+      "estraverse": "4.2.0",
       "execSync": "1.0.2"
     },
     "license": "Eclipse",
