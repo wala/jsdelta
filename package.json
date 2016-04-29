@@ -9,7 +9,7 @@
       "estraverse": "4.2.0",
       "execSync": "1.0.2"
     },
-    "license": "Eclipse",
+    "license": "EPL-1.0",
     "repository" : {
       "type" : "git",
       "url" : "https://github.com/wala/jsdelta.git"
