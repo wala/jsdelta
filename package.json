@@ -1,6 +1,6 @@
 {
     "name": "jsdelta",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "author": "Max Schaefer <xiemaisi@gmail.com>",
     "description": "A delta debugger for JavaScript",
     "dependencies" : {
