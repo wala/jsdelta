@@ -416,8 +416,10 @@ function minimise(nd, parent, idx) {
 }
 
 function pp(ast) {
-    // we pass the 'parse' option here to avoid converting 0.0 to 0, etc.
-    return escodegen.generate(ast, {
+    // we pass the 'parse' option here to avoid converting 0.0 to 0, etc.;
+    // for JSON files, we skip the top-level `Program` and `ExpressionStatement`
+    // nodes to prevent escodegen from inserting spurious parentheses
+    return escodegen.generate(ext === 'json' && ast.body[0] ? ast.body[0].expression : ast, {
 		format: {
 			json: ext === 'json'
 		},
