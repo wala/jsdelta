@@ -43,8 +43,10 @@ function execSync(cmd) {
     }
 }
 
+var DEBUG = false;
 function log_debug(msg) {
-    //console.log(msg);
+    if (DEBUG)
+        console.log(msg);
 }
 
 var /** only knock out entire statements */
@@ -357,7 +359,7 @@ function minimise(nd, parent, idx) {
 					minimise_array(nd['arguments']);
 					break;
 				case 'ArrayExpression':
-					minimise_array(nd.elements, nd, 'elements');
+					minimise_array(nd.elements, nd);
 					break;
 				case 'IfStatement':
 				case 'ConditionalExpression':
@@ -468,7 +470,7 @@ if (res) {
             testSucceededAtLeastOnce = false;
             console.log("Starting fixpoint iteration #%d", ++iterations);
             minimise(ast, null, -1);
-        } while (testSucceededAtLeastOnce)
+        } while (testSucceededAtLeastOnce);
     } else {
         minimise(ast, null, -1);
     }
