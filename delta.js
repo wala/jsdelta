@@ -359,7 +359,7 @@ function minimise(nd, parent, idx) {
 					minimise_array(nd['arguments']);
 					break;
 				case 'ArrayExpression':
-					minimise_array(nd.elements, nd);
+					minimise_array(nd.elements);
 					break;
 				case 'IfStatement':
 				case 'ConditionalExpression':
