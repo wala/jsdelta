@@ -205,7 +205,7 @@ exports.main = function (options) {
             console.log();
         }
         console.log("Minimisation finished; final version is in %s (%d bytes)", smallest, stats.size);
-        process.exit(0);
+        //process.exit(0);
     } else {
         console.error("Original file doesn't satisfy predicate.");
         process.exit(-1);
