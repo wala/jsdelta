@@ -82,7 +82,7 @@ for (var i = 2; i < process.argv.length; ++i) {
 		i += 2;
 		break;
     } else if (arg[0] === '-') {
-		usage();
+		deltalib.usage();
     } else {
 		options.file = process.argv[i++];
 		break;
@@ -98,13 +98,7 @@ options.predicate_args = process.argv.slice(i);
 
 deltalib.main(options);
 
-function usage() {
-    console.error("Usage: " + process.argv[0] + " " + process.argv[1] +
-		" [-q|--quick] [--no-fixpoint] [--cmd COMMAND]" +
-		" [--record FILE | --replay FILE]" +
-		" [--errmsg ERRMSG] [--msg MSG] FILE [PREDICATE] OPTIONS...");
-    process.exit(-1);
-}
+
 
 
 

@@ -68,12 +68,19 @@ function parseOptions(options) {
     replay_idx = options.replay_idx;
 }
 
+exports.usage = function () {
+    console.error("Usage: " + process.argv[0] + " " + process.argv[1] +
+            " [-q|--quick] [--no-fixpoint] [--cmd COMMAND]" +
+            " [--record FILE | --replay FILE]" +
+            " [--errmsg ERRMSG] [--msg MSG] FILE [PREDICATE] OPTIONS...");
+    process.exit(-1);
+}
 
 exports.main = function (options) {
     parseOptions(options);
     // check that we have something to minimise
     if (!file)
-        usage();
+        exports.usage();
 
         // initialise predicate module
     if (typeof predicate.init === 'function')
