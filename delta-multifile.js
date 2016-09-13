@@ -7,25 +7,71 @@
  * 4. output result
  */
 const path = require("path"),
-      fs = require("fs"),
-      copydir = require("copy-dir"),
-      config = require(__dirname + "/config.js");
+      fs = require("node-fs-extra"),
+      config = require(__dirname + "/config.js")
+      deltalib = require(__dirname + "/deltalib.js");
 
-var dir, mainFile, predicate;
+var dir, 
+    mainFile, 
+    predicate,
+    fileUnderTest,
+    tmpDir;
 
 function createAndInstantiateDeltaDir() {
-    var tmpDir = fs.mkdtempSync(config.tmp_dir + "/jsdelta-multifile");
-    copydir.sync(dir, tmpDir);
+    tmpDir = fs.mkdtempSync(config.tmp_dir + "/jsdelta-multifile");
+    fs.copySync(dir, tmpDir);
     return tmpDir;
 }
+
+function deltaDebug(file) {
+    var stats = fs.statSync(file);
+    fileUnderTest = file;
+    if (stats.isDirectory()) {
+        fs.readdirSync(file).forEach(function (child) {
+            childPath = path.resolve(file, child);
+            deltaDebug(childPath);
+        });
+    } else { //Assume it's non-directory file
+        var options = {
+            quick : false,
+            findFixpoint : true,
+            cmd : null,
+            errmsg : null,
+            msg : null,
+            file : file,
+            predicate : predicate_wrapper,
+            predicate_args : [],
+            record : null,
+            replay : null,
+            replay_idx : -1
+        };
+        deltalib.main(options);
+    }
+}
+
+var predicate_wrapper = {
+    test: function predicate_wrapper(deltaReducedFile) {
+        var backupFile = "tmp_file.js";
+        fs.copySync(fileUnderTest, backupFile);
+        fs.copySync(deltaReducedFile, fileUnderTest);
+        var mainFileTmpDir = path.resolve(tmpDir, mainFile);
+        var res = predicate.test(mainFileTmpDir);
+        if (!res) {
+            fs.copySync(backupFile, fileUnderTest);
+        }
+        return res;
+    }
+};
+
 
 function main () {
     parseOptions();
     checkOptions();
-    var tmpDeltaDir = createAndInstantiateDeltaDir();
+    createAndInstantiateDeltaDir();
+    deltaDebug(tmpDir);
+    console.log("Minimized version available at " + tmpDir);
 }
 main();
-
 
 function parseOptions() {
     var args = process.argv;
@@ -34,16 +80,16 @@ function parseOptions() {
     }
     dir = args[2];
     mainFile = args[3];
-    predicate = args[4];
+    predicate = require(args[4]); 
 }
 
 function checkOptions() {
    if (!path.isAbsolute(dir)) {
        logAndExit("Directory " + dir + " must be absolute");
    }
-   var mainFilePath = path.resolve(dir, mainFile);
+   var mainFileFullPath = path.resolve(dir, mainFile);
    try {
-       fs.accessSync(mainFilePath, fs.F_OK); 
+       fs.accessSync(mainFileFullPath, fs.F_OK); 
    }
    catch (err) {
        logAndExit("Could not find main file " + mainFilePath);
