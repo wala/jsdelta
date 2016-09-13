@@ -163,7 +163,6 @@ exports.main = function (options) {
     for (i = 0; fs.existsSync(tmp_dir = config.tmp_dir + "/tmp" + i); ++i);
     fs.mkdirSync(tmp_dir);
 
-
     // the smallest test case so far is kept here
     smallest = tmp_dir + "/delta_js_smallest." + ext;
 
