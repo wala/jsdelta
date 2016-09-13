@@ -7,7 +7,8 @@
       "escodegen": "1.8.0",
       "esprima": "2.7.2",
       "estraverse": "4.2.0",
-      "execSync": "1.0.2"
+      "execSync": "1.0.2",
+      "copy-dir": "0.3.0"
     },
     "license": "EPL-1.0",
     "repository" : {
