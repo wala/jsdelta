@@ -43,8 +43,10 @@ function deltaDebug(file) {
             predicate_args : [],
             record : null,
             replay : null,
-            replay_idx : -1
+            replay_idx : -1,
+	    multifile_mode : true
         };
+	console.log("Reducing " + file);
         deltalib.main(options);
     }
 }

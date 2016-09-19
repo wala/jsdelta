@@ -52,7 +52,11 @@ var /** only knock out entire statements */
     record = null,
 
     /** array to read predicate results from */
-    replay = null, replay_idx = -1;
+    replay = null, replay_idx = -1,
+
+    /** predicate set in multifile mode */
+    multifile_mode = false;
+
 
 function parseOptions(options) {
     quick = options.quick;
@@ -66,6 +70,7 @@ function parseOptions(options) {
     record = options.record;
     replay = options.replay;
     replay_idx = options.replay_idx;
+    multifile_mode = options.multifile_mode;
 }
 
 exports.usage = function () {
@@ -204,7 +209,9 @@ exports.main = function (options) {
             console.log(fs.readFileSync(smallest, 'utf8'));
             console.log();
         }
-        console.log("Minimisation finished; final version is in %s (%d bytes)", smallest, stats.size);
+	if (!multifile_mode) {
+            console.log("Minimisation finished; final version is in %s (%d bytes)", smallest, stats.size);
+	}
         //process.exit(0);
     } else {
         console.error("Original file doesn't satisfy predicate.");
