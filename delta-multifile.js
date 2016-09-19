@@ -55,16 +55,18 @@ function deltaDebug(file) {
 }
 
 var predicate_wrapper = {
-    test: function predicate_wrapper(deltaReducedFile) {
-        var backupFile = "tmp_file.js";
-        fs.copySync(fileUnderTest, backupFile);
-        fs.copySync(deltaReducedFile, fileUnderTest);
-        var mainFileTmpDir = path.resolve(tmpDir, mainFile);
-        var res = predicate.test(mainFileTmpDir);
-        if (!res) {
-            fs.copySync(backupFile, fileUnderTest);
-        }
-        return res;
+    test: function (deltaReducedFile) {
+	var backupFile = path.resolve(tmpDir, "tmp_file.js");
+	fs.copySync(fileUnderTest, backupFile);
+	fs.copySync(deltaReducedFile, fileUnderTest);
+	var mainFileTmpDir = path.resolve(tmpDir, mainFile);
+	var res = predicate.test(mainFileTmpDir);
+
+	//Restore backed-up file if new version fails the predicate
+	if (!res) {
+	    fs.copySync(backupFile, fileUnderTest);
+	}
+	return res;
     }
 };
 
@@ -74,9 +76,14 @@ function main () {
     checkOptions();
     createAndInstantiateDeltaDir();
     deltaDebug(tmpDir);
+    cleanup();
     console.log("Minimized version available at " + tmpDir);
 }
 main();
+
+function cleanup() {
+    fs.unlink(path.resolve(tmpDir, "tmp_file.js"));
+}
 
 function parseOptions() {
     var args = process.argv;
