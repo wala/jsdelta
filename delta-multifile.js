@@ -102,6 +102,6 @@ function logAndExit(msg) {
 }
 
 function usage() {
-    console.error("Usage: node jsdelta-multifile.js DIR MAIN_FILE PREDICATE");
+    console.error("Usage: node delta-multifile.js DIR MAIN_FILE PREDICATE");
     process.exit(-1);
 }
