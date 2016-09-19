@@ -37,7 +37,8 @@ var options = {
     record : null,
     /** array to read predicate results from */
     replay : null,
-    replay_idx : -1
+    replay_idx : -1,
+    multifile_mode : false
 };
 
 // command line option parsing; manual for now
