@@ -23,6 +23,9 @@ function createAndInstantiateDeltaDir() {
     return tmpDir;
 }
 
+/** 
+  * Recursively pass through the file-hierarchy and invoke deltalib.main on the files
+  */
 function deltaDebug(file) {
     var stats = fs.statSync(file);
     fileUnderTest = file;
@@ -104,6 +107,6 @@ function logAndExit(msg) {
 }
 
 function usage() {
-    console.error("Usage: node delta-multifile.js DIR MAIN_FILE PREDICATE");
+    console.error("Usage: node delta-multifile.js DIR MAIN_FILE_RELATIVE_TO_DIR PREDICATE");
     process.exit(-1);
 }
