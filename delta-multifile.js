@@ -46,7 +46,7 @@ function deltaDebug(file) {
             replay_idx : -1,
 	    multifile_mode : true
         };
-	console.log("Reducing " + file);
+	console.log("Reducing " + path.relative(tmpDir, file));
         deltalib.main(options);
     }
 }
