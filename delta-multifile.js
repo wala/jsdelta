@@ -43,34 +43,34 @@ function deltaDebug(file) {
             record : null,
             replay : null,
             replay_idx : -1,
-	    multifile_mode : true
+            multifile_mode : true
         };
 
-	//Try removing fileUnderTest completely before delta-debugging
-	fs.copySync(fileUnderTest, backupFile);      	
-	fs.unlink(fileUnderTest);
+        //try removing fileUnderTest completely before delta-debugging
+        fs.copySync(fileUnderTest, backupFile);      	
+        fs.unlink(fileUnderTest);
 
-	//Reduce fileUnderTest if predicate fails without fileUndeTest
-	if (!predicate.test(mainFileTmpDir)) {
-	    fs.copySync(backupFile, fileUnderTest);      	
-	    console.log("Reducing " + path.relative(tmpDir, fileUnderTest));
-	    deltalib.main(options);
-	}
+        //if that fails, then restore the fileUnderTest and try to reduce it
+        if (!predicate.test(mainFileTmpDir)) {
+            fs.copySync(backupFile, fileUnderTest);      	
+            console.log("Reducing " + path.relative(tmpDir, fileUnderTest));
+            deltalib.main(options);
+        }
     }
 }
 
 var predicate_wrapper = {
     test: function (deltaReducedFile) {
-	fs.copySync(fileUnderTest, backupFile);
-	fs.copySync(deltaReducedFile, fileUnderTest);
-	mainFileTmpDir = path.resolve(tmpDir, mainFile);
-	var res = predicate.test(mainFileTmpDir);
+        fs.copySync(fileUnderTest, backupFile);
+        fs.copySync(deltaReducedFile, fileUnderTest);
+        mainFileTmpDir = path.resolve(tmpDir, mainFile);
+        var res = predicate.test(mainFileTmpDir);
 
-	//Restore backed-up file if new version fails the predicate
-	if (!res) {
-	    fs.copySync(backupFile, fileUnderTest);
-	}
-	return res;
+        //Restore backed-up file if new version fails the predicate
+        if (!res) {
+            fs.copySync(backupFile, fileUnderTest);
+        }
+        return res;
     }
 };
 
