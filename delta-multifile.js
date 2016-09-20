@@ -1,11 +1,5 @@
 #!/usr/bin/env node 
-/* args[dir, mainfile, pred]
- * 1. Create tmp dir, and move dir to tmp dir
- * 2. invoke jsdelta on all files (and recursively visit sub directories) 
- *    - when minimized move to tmp dir and overwrite original
- * 3. invoke jsdelta on main file
- * 4. output result
- */
+
 const path = require("path"),
       fs = require("node-fs-extra"),
       config = require(__dirname + "/config.js")
@@ -20,8 +14,8 @@ var dir,
     backupFile;
 
 /** 
-  * Recursively pass through the file-hierarchy and invoke deltalib.main on the files
-  */
+ * Recursively pass through the file-hierarchy and invoke deltalib.main on the files
+ */
 function deltaDebug(file) {
     //main file should be the last file to be reduced
     if (file === mainFileTmpDir) {
@@ -113,16 +107,16 @@ function parseOptions() {
 }
 
 function checkOptions() {
-   if (!path.isAbsolute(dir)) {
-       logAndExit("Directory " + dir + " must be absolute");
-   }
-   var mainFileFullPath = path.resolve(dir, mainFile);
-   try {
-       fs.accessSync(mainFileFullPath, fs.F_OK); 
-   }
-   catch (err) {
-       logAndExit("Could not find main file " + mainFileFullPath);
-   }
+    if (!path.isAbsolute(dir)) {
+        logAndExit("Directory " + dir + " must be absolute");
+    }
+    var mainFileFullPath = path.resolve(dir, mainFile);
+    try {
+        fs.accessSync(mainFileFullPath, fs.F_OK); 
+    }
+    catch (err) {
+        logAndExit("Could not find main file " + mainFileFullPath);
+    }
 }
 
 function createTmpBackupFile() {
