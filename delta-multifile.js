@@ -106,7 +106,7 @@ function checkOptions() {
        fs.accessSync(mainFileFullPath, fs.F_OK); 
    }
    catch (err) {
-       logAndExit("Could not find main file " + mainFilePath);
+       logAndExit("Could not find main file " + mainFileFullPath);
    }
 }
 
@@ -126,6 +126,9 @@ function createAndInstantiateDeltaDir() {
 function logAndExit(msg) {
     console.error(msg);
     process.exit(-1);
+    //process.exit() does not guarentee immediate termination
+    //so an infinite loop is inserted to avoid continuing the uninteded execution.
+    while(true) {}
 }
 
 function usage() {
