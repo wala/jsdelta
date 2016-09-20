@@ -23,6 +23,11 @@ var dir,
   * Recursively pass through the file-hierarchy and invoke deltalib.main on the files
   */
 function deltaDebug(file) {
+    //main file should be the last file to be reduced
+    if (file === mainFileTmpDir) {
+        return;
+    }
+
     var stats = fs.statSync(file);
     fileUnderTest = file;
     if (stats.isDirectory()) {
@@ -31,20 +36,7 @@ function deltaDebug(file) {
             deltaDebug(childPath);
         });
     } else { //Assume it's non-directory file
-        var options = {
-            quick : false,
-            findFixpoint : true,
-            cmd : null,
-            errmsg : null,
-            msg : null,
-            file : file,
-            predicate : predicate_wrapper,
-            predicate_args : [],
-            record : null,
-            replay : null,
-            replay_idx : -1,
-            multifile_mode : true
-        };
+        var options = new Options(file);
 
         //try removing fileUnderTest completely before delta-debugging
         fs.copySync(fileUnderTest, backupFile);      	
@@ -57,6 +49,28 @@ function deltaDebug(file) {
             deltalib.main(options);
         }
     }
+}
+
+
+function deltaDebugMain () {
+    options = new Options(mainFileTmpDir);
+    fileUnderTest = mainFileTmpDir;
+    deltalib.main(options);
+}
+
+function Options (file) {
+    this.quick = false,
+    this.findFixpoint = true,
+    this.cmd = null,
+    this.errmsg = null,
+    this.msg = null,
+    this.file = file,
+    this.predicate = predicate_wrapper,
+    this.predicate_args = [],
+    this.record = null,
+    this.replay = null,
+    this.replay_idx = -1,
+    this.multifile_mode = true
 }
 
 var predicate_wrapper = {
@@ -83,6 +97,7 @@ function main () {
 
     //Begin
     deltaDebug(tmpDir);
+    deltaDebugMain();
     console.log("Minimized version available at " + tmpDir);
 }
 main();
