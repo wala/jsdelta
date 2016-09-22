@@ -11,30 +11,40 @@ var dir,
     predicate,
     fileUnderTest,
     tmpDir,
+    backupDir,
     backupFile;
 
 /** 
- * Recursively pass through the file-hierarchy and invoke deltalib.main on the files
+ * Recursively pass through the file-hierarchy and invoke deltalib.main on all files
  */
 function deltaDebug(file) {
     //main file should be the last file to be reduced
     if (file === mainFileTmpDir) {
         return;
     }
-
-    var stats = fs.statSync(file);
     fileUnderTest = file;
-    if (stats.isDirectory()) {
+
+    if (fs.statSync(file).isDirectory()) {
         fs.readdirSync(file).forEach(function (child) {
-            childPath = path.resolve(file, child);
-            deltaDebug(childPath);
-        });
-    } else { //Assume it's non-directory file
+            var childPath = path.resolve(file, child);
+
+            if (fs.statSync(childPath).isDirectory()) {
+                //Try removing directory completely before delta-debugging
+                fs.copySync(childPath, backupDir);
+                fs.removeSync(childPath);
+                if (!predicate.test(mainFileTmpDir)) {
+                    fs.copySync(backupDir, childPath);
+                    deltaDebug(childPath);
+                }
+            } else {
+                deltaDebug(childPath);
+            }});
+    } else { 
         var options = new Options(file);
 
         //try removing fileUnderTest completely before delta-debugging
         fs.copySync(fileUnderTest, backupFile);      	
-        fs.unlink(fileUnderTest);
+        fs.removeSync(fileUnderTest);
 
         //if that fails, then restore the fileUnderTest and try to reduce it
         if (!predicate.test(mainFileTmpDir)) {
@@ -82,12 +92,11 @@ var predicate_wrapper = {
     }
 };
 
-
 function main () {
     parseOptions();
     checkOptions();
     createAndInstantiateDeltaDir();
-    createTmpBackupFile();
+    instantiateBackupPaths();
 
     //Begin
     deltaDebug(tmpDir);
@@ -119,8 +128,9 @@ function checkOptions() {
     }
 }
 
-function createTmpBackupFile() {
+function instantiateBackupPaths() {
     var tmpBackupDir = fs.mkdtempSync(config.tmp_dir + "/backup");
+    backupDir = path.resolve(tmpBackupDir, "backupDir");
     backupFile = path.resolve(tmpBackupDir, "backup");
     console.log(backupFile);
 }
