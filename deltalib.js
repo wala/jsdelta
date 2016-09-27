@@ -60,7 +60,7 @@ exports.usage = function () {
     console.error("Usage: " + process.argv[0] + " " + process.argv[1] +
             " [-q|--quick] [--no-fixpoint] [--cmd COMMAND]" +
             " [--record FILE | --replay FILE]" +
-            " [--errmsg ERRMSG] [--msg MSG] FILE [PREDICATE] OPTIONS...");
+            " [--errmsg ERRMSG] [--msg MSG] [--dir DIR] FILE [PREDICATE] OPTIONS...");
     process.exit(-1);
 }
 

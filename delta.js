@@ -16,13 +16,13 @@ const path = require("path"),
       config = require(__dirname + "/config.js")
       deltalib = require(__dirname + "/deltalib.js");
 
-var dir, 
-    mainFileTmpDir,
-    predicate,
-    fileUnderTest,
-    tmpDir,
-    backupDir,
-    backupFile;
+      var dir, 
+      mainFileTmpDir,
+      predicate,
+      fileUnderTest,
+      tmpDir,
+      backupDir,
+      backupFile;
 
 var options = {
     /** only knock out entire statements */
@@ -54,16 +54,16 @@ var options = {
 for (var i = 2; i < process.argv.length; ++i) {
     var arg = process.argv[i];
     if (arg === '--quick' || arg === '-q') {
-		options.quick = true;
+        options.quick = true;
     } else if (arg === '--no-fixpoint') {
         options.findFixpoint = false;
     } else if (arg === '--cmd') {
-		if (options.cmd === null)
-			options.cmd = String(process.argv[++i]);
-		else
-			console.warn("More than one command specified; ignoring.");
+        if (options.cmd === null)
+            options.cmd = String(process.argv[++i]);
+        else
+            console.warn("More than one command specified; ignoring.");
     } else if (arg === '--timeout') {
-		console.warn("Timeout ignored.");
+        console.warn("Timeout ignored.");
     } else if (arg === '--errmsg') {
         if (options.errmsg === null)
             options.errmsg = String(process.argv[++i]);
@@ -76,43 +76,45 @@ for (var i = 2; i < process.argv.length; ++i) {
             console.warn("More than one message specified; ignoring.");
         }
     } else if (arg === '--record') {
-		options.record = process.argv[++i];
-		if (fs.existsSync(options.record))
-			fs.unlinkSync(options.record);
+        options.record = process.argv[++i];
+        if (fs.existsSync(options.record))
+            fs.unlinkSync(options.record);
     } else if (arg === '--replay') {
-		if (options.cmd) {
-			console.warn("--replay after --cmd ignored");
-		} else {
-			options.replay = fs.readFileSync(process.argv[++i], 'utf-8').split('\n');
-			replay_idx = 0;
-		}
+        if (options.cmd) {
+            console.warn("--replay after --cmd ignored");
+        } else {
+            options.replay = fs.readFileSync(process.argv[++i], 'utf-8').split('\n');
+            replay_idx = 0;
+        }
     } else if (arg === '--dir') {
         options.multifile_mode = true;
         options.dir = process.argv[++i];
     } else if (arg === '--') {
-		options.file = process.argv[i + 1];
-		i += 2;
-		break;
+        options.file = process.argv[i + 1];
+        i += 2;
+        break;
     } else if (arg[0] === '-') {
-		deltalib.usage();
+        deltalib.usage();
     } else {
-		options.file = process.argv[i++];
-		break;
+        options.file = process.argv[i++];
+        break;
     }
 }
 
 // check whether a predicate module was specified
-if (i < process.argv.length)
+if (i < process.argv.length) {
     options.predicate = require(process.argv[i++]);
+}
 
 // the remaining arguments will be passed to the predicate
 options.predicate_args = process.argv.slice(i);
 synthesizePredicate();
 
+//Run in multifile mode
 if (options.multifile_mode) {
     //options = new Options(mainFileTmpDir);
     console.log("Running in multifile mode");
-    checkOptions();
+    checkMultiFileModeOptions();
     createAndInstantiateDeltaDir();
     instantiateBackupPaths();
 
@@ -121,11 +123,11 @@ if (options.multifile_mode) {
     deltaDebugMain();
     console.log("Minimized version available at " + tmpDir);
 
-} else {
+} else { //Run in singlefile mode
     deltalib.main(options);
 }
 
-function checkOptions() {
+function checkMultiFileModeOptions() {
     var path = options.path;
     if (!path.isAbsolute(dir)) {
         logAndExit("Directory " + dir + " must be absolute");
@@ -205,7 +207,8 @@ function Options (file) {
     this.quick = options.quick,
     this.findFixpoint = options.findFixpoint,
     this.file = file,
-    this.predicate =  {
+    //Predicate wrapper
+    this.predicate = {
         test: function (deltaReducedFile) {
             fs.copySync(fileUnderTest, backupFile);
             fs.copySync(deltaReducedFile, fileUnderTest);
@@ -305,7 +308,7 @@ function synthesizePredicate () {
     }
 }
 
-function checkOptions() {
+function checkMultiFileModeOptions() {
     var dir = options.dir;
     var file = options.file;
     if (!path.isAbsolute(dir)) {
@@ -327,9 +330,3 @@ function logAndExit(msg) {
     //so an infinite loop is inserted to avoid continuing the uninteded execution.
     while(true) {}
 }
-
-
-
-
-
-
