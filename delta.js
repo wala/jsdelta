@@ -204,9 +204,6 @@ function deltaDebugMain () {
 function Options (file) {
     this.quick = options.quick,
     this.findFixpoint = options.findFixpoint,
-    this.cmd = options.cmd,
-    this.errmsg = options.errmsg,
-    this.msg = options.msg,
     this.file = file,
     this.predicate =  {
         test: function (deltaReducedFile) {
@@ -224,8 +221,6 @@ function Options (file) {
     },
     this.predicate_args = options.predicate_args, 
     this.record = options.record,
-    this.replay = options.replay,
-    this.replay_idx = options.replay_idx,
     this.multifile_mode = true
 }
 
