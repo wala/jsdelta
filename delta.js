@@ -112,7 +112,6 @@ synthesizePredicate();
 
 //Run in multifile mode
 if (options.multifile_mode) {
-    //options = new OptionsMultiFileMode(mainFileTmpDir);
     console.log("Running in multifile mode");
     checkMultiFileModeOptions();
     createAndInstantiateDeltaDir();
