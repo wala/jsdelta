@@ -190,8 +190,10 @@ function deltaDebug(file) {
         //if that fails, then restore the fileUnderTest and try to reduce it
         if (!predicate.test(mainFileTmpDir)) {
             fs.copySync(backupFile, fileUnderTest);      	
-            console.log("Reducing " + path.relative(tmpDir, fileUnderTest));
-            deltalib.main(options);
+            if (isJsOrJsonFile(fileUnderTest)) {
+                console.log("Reducing " + path.relative(tmpDir, fileUnderTest));
+                deltalib.main(options);
+            }
         }
     }
 }
@@ -224,6 +226,11 @@ function OptionsMultiFileMode (file) {
     this.predicate_args = options.predicate_args, 
     this.record = options.record,
     this.multifile_mode = true
+}
+
+function isJsOrJsonFile(file) {
+    var fileNoCaps = file.toLowerCase();
+    return fileNoCaps.endsWith(".js") || fileNoCaps.endsWith(".json");
 }
 
 function synthesizePredicate () {
