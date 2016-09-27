@@ -16,6 +16,9 @@
       "url" : "https://github.com/wala/jsdelta.git"
     },
     "bin": {
-      "jsdelta": "./delta.js",
+      "jsdelta": "./delta.js"
+    },
+    "scripts" : {
+      "test": "./test.sh"
     }
 }
