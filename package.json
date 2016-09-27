@@ -17,6 +17,5 @@
     },
     "bin": {
       "jsdelta": "./delta.js",
-      "jsdelta-multifile": "./delta-multifile.js"
     }
 }
