@@ -1,1 +1,1 @@
-./delta.js $(pwd)/examples/simple/main.js ./examples/pred.js
+./delta.js examples/simple/main.js ./examples/pred.js
