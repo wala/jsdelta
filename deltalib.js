@@ -88,77 +88,77 @@ exports.main = function (options) {
         exports.usage();
 
         // initialise predicate module
-    if (typeof predicate.init === 'function')
-        predicate.init(predicate_args);
+    //if (typeof predicate.init === 'function')
+    //    predicate.init(predicate_args);
 
     // if no predicate module was specified, synthesise one from the other options
-    if (!predicate.test) {
-        predicate.cmd = predicate.cmd || cmd;
-
-        if (replay) {
-            predicate.test = function (fn) {
-                var stats = fs.statSync(fn);
-                console.log("Testing candidate " + fn +
-                    " (" + stats.size + " bytes)");
-                var res = replay[replay_idx++] === 'true';
-                if (res)
-                    console.log("    aborted with relevant error (recorded)");
-                else
-                    console.log("    completed successfully (recorded)");
-                return res;
-            };
-        } else {
-            if (!predicate.cmd) {
-                console.error("No test command specified.");
-                process.exit(-1);
-            }
-
-            if (typeof predicate.checkResult !== 'function') {
-                if (errmsg || msg) {
-                    predicate.checkResult = function (error, stdout, stderr) {
-                        if ((errmsg && stderr && stderr.indexOf(errmsg) !== -1) ||
-                            (msg && ((stderr && stderr.indexOf(msg) !== -1) ||
-                                (stdout && stdout.indexOf(msg) !== -1)))) {
-                            console.log("    aborted with relevant error");
-                            return true;
-                        } else if (error) {
-                            console.log("    aborted with other error");
-                            return false;
-                        } else {
-                            console.log("    completed successfully");
-                            return false;
-                        }
-                    };
-                } else {
-                    predicate.checkResult = function (error, stdout, stderr) {
-                        if (error) {
-                            console.log("    aborted with error");
-                            return true;
-                        } else {
-                            console.log("    completed successfully");
-                            return false;
-                        }
-                    };
-                }
-            }
-
-            predicate.test = function (fn) {
-                var stats = fs.statSync(fn);
-                console.log("Testing candidate " + fn +
-                    " (" + stats.size + " bytes)");
-                var start = new Date();
-                var stdout_file = fn + ".stdout",
-                    stderr_file = fn + ".stderr";
-                var error = deltalib.execSync(predicate.cmd + " '" + fn + "'" +
-                    " >'" + stdout_file + "'" +
-                    " 2>'" + stderr_file + "'");
-                var end = new Date();
-                var stdout = fs.readFileSync(stdout_file, "utf-8"),
-                    stderr = fs.readFileSync(stderr_file, "utf-8");
-                return predicate.checkResult(error, stdout, stderr, end - start);
-            };
-        }
-    }
+//    if (!predicate.test) {
+//        predicate.cmd = predicate.cmd || cmd;
+//
+//        if (replay) {
+//            predicate.test = function (fn) {
+//                var stats = fs.statSync(fn);
+//                console.log("Testing candidate " + fn +
+//                    " (" + stats.size + " bytes)");
+//                var res = replay[replay_idx++] === 'true';
+//                if (res)
+//                    console.log("    aborted with relevant error (recorded)");
+//                else
+//                    console.log("    completed successfully (recorded)");
+//                return res;
+//            };
+//        } else {
+//            if (!predicate.cmd) {
+//                console.error("No test command specified.");
+//                process.exit(-1);
+//            }
+//
+//            if (typeof predicate.checkResult !== 'function') {
+//                if (errmsg || msg) {
+//                    predicate.checkResult = function (error, stdout, stderr) {
+//                        if ((errmsg && stderr && stderr.indexOf(errmsg) !== -1) ||
+//                            (msg && ((stderr && stderr.indexOf(msg) !== -1) ||
+//                                (stdout && stdout.indexOf(msg) !== -1)))) {
+//                            console.log("    aborted with relevant error");
+//                            return true;
+//                        } else if (error) {
+//                            console.log("    aborted with other error");
+//                            return false;
+//                        } else {
+//                            console.log("    completed successfully");
+//                            return false;
+//                        }
+//                    };
+//                } else {
+//                    predicate.checkResult = function (error, stdout, stderr) {
+//                        if (error) {
+//                            console.log("    aborted with error");
+//                            return true;
+//                        } else {
+//                            console.log("    completed successfully");
+//                            return false;
+//                        }
+//                    };
+//                }
+//            }
+//
+//            predicate.test = function (fn) {
+//                var stats = fs.statSync(fn);
+//                console.log("Testing candidate " + fn +
+//                    " (" + stats.size + " bytes)");
+//                var start = new Date();
+//                var stdout_file = fn + ".stdout",
+//                    stderr_file = fn + ".stderr";
+//                var error = deltalib.execSync(predicate.cmd + " '" + fn + "'" +
+//                    " >'" + stdout_file + "'" +
+//                    " 2>'" + stderr_file + "'");
+//                var end = new Date();
+//                var stdout = fs.readFileSync(stdout_file, "utf-8"),
+//                    stderr = fs.readFileSync(stderr_file, "utf-8");
+//                return predicate.checkResult(error, stdout, stderr, end - start);
+//            };
+//        }
+//    }
 
     var src = fs.readFileSync(file, 'utf-8');
 
