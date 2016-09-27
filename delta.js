@@ -112,7 +112,7 @@ synthesizePredicate();
 
 //Run in multifile mode
 if (options.multifile_mode) {
-    //options = new Options(mainFileTmpDir);
+    //options = new OptionsMultiFileMode(mainFileTmpDir);
     console.log("Running in multifile mode");
     checkMultiFileModeOptions();
     createAndInstantiateDeltaDir();
@@ -182,7 +182,7 @@ function deltaDebug(file) {
             }
         });
     } else { 
-        var options = new Options(file);
+        var options = new OptionsMultiFileMode(file);
 
         //try removing fileUnderTest completely before delta-debugging
         fs.copySync(fileUnderTest, backupFile);      	
@@ -198,12 +198,12 @@ function deltaDebug(file) {
 }
 
 function deltaDebugMain () {
-    options = new Options(mainFileTmpDir);
+    options = new OptionsMultiFileMode(mainFileTmpDir);
     fileUnderTest = mainFileTmpDir;
     deltalib.main(options);
 }
 
-function Options (file) {
+function OptionsMultiFileMode (file) {
     this.quick = options.quick,
     this.findFixpoint = options.findFixpoint,
     this.file = file,
