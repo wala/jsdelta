@@ -126,19 +126,6 @@ if (options.multifile_mode) {
     deltalib.main(options);
 }
 
-function checkMultiFileModeOptions() {
-    var path = options.path;
-    if (!path.isAbsolute(dir)) {
-        logAndExit("Directory " + dir + " must be absolute");
-    }
-    var mainFileFullPath = path.resolve(dir, file);
-    try {
-        fs.accessSync(mainFileFullPath, fs.F_OK); 
-    }
-    catch (err) {
-        logAndExit("Could not find main file " + mainFileFullPath);
-    }
-}
 
 function instantiateBackupPaths() {
     var tmpBackupDir = fs.mkdtempSync(config.tmp_dir + "/backup");
@@ -318,7 +305,7 @@ function checkMultiFileModeOptions() {
     var dir = options.dir;
     var file = options.file;
     if (!path.isAbsolute(dir)) {
-        logAndExit("Directory " + dir + " must be absolute");
+        dir = path.resolve(__dirname, dir);
     }
     var mainFileFullPath = path.resolve(dir, file);
     try {
