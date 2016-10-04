@@ -347,7 +347,7 @@ function readDirSorted(directory) {
 function computeSha(directory) {
     var subFiles = listFilesRecursively(directory);
     const shaOptions = {files : subFiles, 
-        algorithm : 'sha1', 
+        algorithm : "sha1", 
         noGlob : true};
     return hashFiles.sync(shaOptions);
 }
