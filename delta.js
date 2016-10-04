@@ -13,17 +13,17 @@
 
 const path = require("path"),
       fs = require("node-fs-extra"),
-      config = require(__dirname + "/config.js")
-      deltalib = require(__dirname + "/deltalib.js")
+      config = require(__dirname + "/config.js"),
+      deltalib = require(__dirname + "/deltalib.js"),
       hashFiles = require("hash-files");
 
-      var dir, 
-      mainFileTmpDir,
-      predicate,
-      fileUnderTest,
-      tmpDir,
-      backupDir,
-      backupFile;
+var dir, 
+    mainFileTmpDir,
+    predicate,
+    fileUnderTest,
+    tmpDir,
+    backupDir,
+    backupFile;
 
 var options = {
     /** only knock out entire statements */
