@@ -1,6 +1,5 @@
-var execSucc = function(filename) {
+var execSucc = function (filename) {
     var process = require("child_process");
-
     const options = {
         stdio: "pipe"
     };
@@ -15,5 +14,5 @@ var execSucc = function(filename) {
         return false;
     }
     return output.indexOf("success") !== -1;
-}
+};
 exports.test = execSucc;
