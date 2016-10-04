@@ -8,7 +8,8 @@
       "esprima": "2.7.2",
       "estraverse": "4.2.0",
       "execSync": "1.0.2",
-      "node-fs-extra": "0.8.1"
+      "node-fs-extra": "0.8.1",
+      "hash-files": "1.1.1"
     },
     "license": "EPL-1.0",
     "repository" : {

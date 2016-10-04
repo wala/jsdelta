@@ -14,7 +14,8 @@
 const path = require("path"),
       fs = require("node-fs-extra"),
       config = require(__dirname + "/config.js")
-      deltalib = require(__dirname + "/deltalib.js");
+      deltalib = require(__dirname + "/deltalib.js")
+      hashFiles = require("hash-files");
 
       var dir, 
       mainFileTmpDir,
@@ -117,9 +118,23 @@ if (options.multifile_mode) {
     createAndInstantiateDeltaDir();
     instantiateBackupPaths();
 
-    //Begin
-    deltaDebug(tmpDir);
-    deltaDebugMain();
+    //Repeat delta debugging until no changes are registered
+    if (options.findFixpoint) {
+        var count = 1;
+        var newSha = computeSha(tmpDir);
+        var prevSha = "";
+        while (newSha !== prevSha) {
+            console.log("Multifile fixpoint iteration: #" + count);
+            deltaDebug(tmpDir);
+            deltaDebugMain();
+            prevSha = newSha;
+            newSha = computeSha(tmpDir);
+            count++;
+        }
+    } else {
+        deltaDebug(tmpDir);
+        deltaDebugMain();
+    }
     console.log("Minimized version available at " + tmpDir);
 
 } else { //Run in singlefile mode
@@ -131,7 +146,6 @@ function instantiateBackupPaths() {
     var tmpBackupDir = fs.mkdtempSync(config.tmp_dir + "/backup");
     backupDir = path.resolve(tmpBackupDir, "backupDir");
     backupFile = path.resolve(tmpBackupDir, "backup");
-    console.log(backupFile);
 }
 
 function createAndInstantiateDeltaDir() {
@@ -322,4 +336,25 @@ function logAndExit(msg) {
     //process.exit() does not guarentee immediate termination
     //so an infinite loop is inserted to avoid continuing the uninteded execution.
     while(true) {}
+}
+
+function computeSha(directory) {
+    var subFiles = listFilesRecursively(directory);
+    const shaOptions = {files : subFiles, 
+        algorithm : 'sha1', 
+        noGlob : true};
+    return hashFiles.sync(shaOptions);
+}
+
+function listFilesRecursively(file) {
+    var subFiles = [];
+    fs.readdirSync(file).forEach(function (child) {
+        var childFull = path.resolve(file, child);
+        if (fs.statSync(childFull).isDirectory()) {
+            subFiles = subFiles.concat(listFilesRecursively(childFull));
+        } else {
+            subFiles.push(childFull);
+        }
+    });
+    return subFiles;
 }
