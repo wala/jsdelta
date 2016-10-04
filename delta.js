@@ -166,19 +166,17 @@ function deltaDebug(file) {
     fileUnderTest = file;
 
     if (fs.statSync(file).isDirectory()) {
-        fs.readdirSync(file).forEach(function (child) {
-            var childPath = path.resolve(file, child);
-
-            if (fs.statSync(childPath).isDirectory()) {
+        readDirSorted(file).forEach(function (child) {
+            if (fs.statSync(child).isDirectory()) {
                 //Try removing directory completely before delta-debugging
-                fs.copySync(childPath, backupDir);
-                fs.removeSync(childPath);
+                fs.copySync(child, backupDir);
+                fs.removeSync(child);
                 if (!predicate.test(mainFileTmpDir)) {
-                    fs.copySync(backupDir, childPath);
-                    deltaDebug(childPath);
+                    fs.copySync(backupDir, child);
+                    deltaDebug(child);
                 }
             } else {
-                deltaDebug(childPath);
+                deltaDebug(child);
             }
         });
     } else { 
@@ -336,6 +334,14 @@ function logAndExit(msg) {
     //process.exit() does not guarentee immediate termination
     //so an infinite loop is inserted to avoid continuing the uninteded execution.
     while(true) {}
+}
+
+function readDirSorted(directory) {
+    files = [];
+    fs.readdirSync(directory).forEach(function (child) {
+        files.push(path.resolve(directory, child));
+    });
+    return files.sort();
 }
 
 function computeSha(directory) {
