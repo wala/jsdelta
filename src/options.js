@@ -34,7 +34,8 @@ function buildOptionsObject(argv) {
         multifile_mode: false,
         /** directory to minimize when multifile_mode is enabled*/
         dir: null,
-        replay_idx: -1
+        replay_idx: -1,
+        indentation: 0
     };
 
     // command line option parsing; manual for now

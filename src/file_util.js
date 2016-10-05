@@ -1,4 +1,5 @@
 const fs = require("fs"),
+    cp = require("child_process"),
     escodegen = require("escodegen"),
     esprima = require("esprima");
 // get name of current test case
@@ -31,11 +32,28 @@ function pp(state) {
         format: {
             json: state.ext === 'json'
         },
-        parse: esprima.parse
+        parse: parse
     });
 }
 
+function parse(input) {
+    try {
+        return esprima.parse(input);
+    } catch (e) {
+        throw e;
+    }
+}
+
+function du_sb(file) {
+    var rawOut = cp.spawnSync('du', ['-sb', file]).stdout;
+    var out = String(rawOut).trim();
+    var extractor = /([^\t]+).*/;
+    return extractor.exec(out)[1];
+}
+
+module.exports.du_sb = du_sb;
 module.exports.getTempFileName = getTempFileName;
 module.exports.writeTempFile = writeTempFile;
 module.exports.persistAST = persistAST;
 module.exports.pp = pp;
+module.exports.parse = parse;

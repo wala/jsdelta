@@ -43,12 +43,11 @@ function main(options) {
     do {
         logging.log("Multifile fixpoint iteration: #" + count);
         deltaDebugFiles(state.tmpDir);
-        deltaDebugMain();
         prevSha = newSha;
         newSha = computeSha(state.tmpDir);
         count++;
     } while (options.findFixpoint && newSha !== prevSha);
-    logging.log("Minimized version available at " + state.tmpDir);
+    logging.logDone(state.tmpDir);
 
     function makeOptionsForSingleFileMode(file) {
         var singleOptions = {};
@@ -127,6 +126,8 @@ function main(options) {
      * Recursively pass through the file-hierarchy and invoke delta_single.main on all files
      */
     function deltaDebugFiles(file) {
+        options.indentation++;
+        logging.logTargetChange(file, options.indentation, state.tmpDir);
         //main file should be the last file to be reduced
         if (file === state.mainFileTmpDir) {
             return;
@@ -148,8 +149,6 @@ function main(options) {
                 }
             });
         } else {
-
-
             //try removing fileUnderTest completely before delta-debugging
             fs.copySync(state.fileUnderTest, state.backupFile);
             fs.removeSync(state.fileUnderTest);
@@ -158,16 +157,11 @@ function main(options) {
             if (!options.predicate.test(state.mainFileTmpDir)) {
                 fs.copySync(state.backupFile, state.fileUnderTest);
                 if (isJsOrJsonFile(state.fileUnderTest)) {
-                    logging.log("Reducing " + path.relative(state.tmpDir, state.fileUnderTest));
                     delta_single.reduce(makeOptionsForSingleFileMode(file));
                 }
             }
         }
-    }
-
-    function deltaDebugMain() {
-        state.fileUnderTest = state.mainFileTmpDir;
-        delta_single.reduce(makeOptionsForSingleFileMode(state.fileUnderTest));
+        options.indentation--;
     }
 
     function isJsOrJsonFile(file) {

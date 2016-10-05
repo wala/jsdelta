@@ -66,16 +66,8 @@ function main(options) {
                 done = false;
             }
         }
-        var stats = fs.statSync(smallest);
         if (!options.multifile_mode) {
-            if (stats.size < 2000) {
-                logging.log("Final version content:");
-                // small enough to display
-                logging.log("```");
-                logging.log(fs.readFileSync(smallest, 'utf8'));
-                logging.log("```");
-            }
-            logging.log("Minimisation finished; final version is in %s (%d bytes)", smallest, stats.size);
+            logging.logDone(smallest);
         }
     } else {
         logging.error("Original file doesn't satisfy predicate.");
@@ -297,11 +289,12 @@ function main(options) {
         if (state.ext === 'json')
             input = '(' + input + ')';
 
-        state.ast = esprima.parse(input);
+        state.ast = file_util.parse(input);
     }
 
     function test() {
         var fn = file_util.writeTempFile(state);
+        logging.logTargetChange(fn, options.indentation);
         var res = options.predicate.test(fn);
         if (options.record)
             fs.appendFileSync(options.record, !!res + "\n");
