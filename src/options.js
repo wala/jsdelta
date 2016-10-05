@@ -121,7 +121,7 @@ function buildOptionsObject(argv) {
 
 function execSync(cmd) {
     try {
-        require('cp').execSync(cmd);
+        require('child_process').execSync(cmd);
         return false;
     } catch (e) {
         return true;
