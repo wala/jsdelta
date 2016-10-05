@@ -1,22 +1,30 @@
 const file_util = require("./file_util"),
     util = require("util"),
     fs = require("fs");
-function makeIndentation(indent) {
-    return "  ".repeat(indent);
+var indentation = [];
+function formatIndentation() {
+    return indentation.join("");
+}
+function addIndentation(args) {
+    args[0] = util.format("%s%s", formatIndentation(), args[0]);
 }
 module.exports = {
+
     log: function () {
+        addIndentation(arguments);
         console.log.apply(console, arguments)
     },
     warn: function () {
+        addIndentation(arguments);
         console.warn.apply(console, arguments)
     },
     error: function () {
+        addIndentation(arguments);
         console.error.apply(console, arguments)
     },
-    logTargetChange: function (file, indent, dir) {
+    logTargetChange: function (file, dir) {
         var dirInfo = dir ? util.format(" In %s (%s bytes)", dir, file_util.du_sb(dir)) : "";
-        this.log("%sTarget: %s (%s bytes)%s", makeIndentation(indent), file, file_util.du_sb(file), dirInfo);
+        this.log("Target: %s (%s bytes)%s", file, file_util.du_sb(file), dirInfo);
     },
     logDone: function (file) {
         var size = file_util.du_sb(file);
@@ -28,6 +36,14 @@ module.exports = {
             this.log("```");
         }
         this.log("Minimisation finished; final version is at %s (%d bytes)", file, size);
+    },
+    increaseIndentation: function () {
+        indentation.push("  ")
+    },
+    decreaseIndentation: function () {
+        indentation.pop();
+    },
+    getIndentation: function () {
+        return formatIndentation();
     }
-
 };

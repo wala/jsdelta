@@ -126,10 +126,11 @@ function main(options) {
      * Recursively pass through the file-hierarchy and invoke delta_single.main on all files
      */
     function deltaDebugFiles(file) {
-        options.indentation++;
-        logging.logTargetChange(file, options.indentation, state.tmpDir);
+        logging.increaseIndentation();
+        logging.logTargetChange(file, state.tmpDir);
         //main file should be the last file to be reduced
         if (file === state.mainFileTmpDir) {
+            logging.decreaseIndentation();
             return;
         }
         state.fileUnderTest = file;
@@ -161,7 +162,7 @@ function main(options) {
                 }
             }
         }
-        options.indentation--;
+        logging.decreaseIndentation();
     }
 
     function isJsOrJsonFile(file) {

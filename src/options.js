@@ -34,8 +34,7 @@ function buildOptionsObject(argv) {
         multifile_mode: false,
         /** directory to minimize when multifile_mode is enabled*/
         dir: null,
-        replay_idx: -1,
-        indentation: 0
+        replay_idx: -1
     };
 
     // command line option parsing; manual for now
@@ -107,7 +106,10 @@ function buildOptionsObject(argv) {
     }
 
     synthesizePredicate(options);
-
+    var origPredicate = options.predicate.test;
+    options.predicate.test = function (fn) {
+        return origPredicate(fn, logging.getIndentation());
+    };
 
     // check that we have something to minimise
     if (!options.file)

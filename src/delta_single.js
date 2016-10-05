@@ -294,7 +294,7 @@ function main(options) {
 
     function test() {
         var fn = file_util.writeTempFile(state);
-        logging.logTargetChange(fn, options.indentation);
+        logging.logTargetChange(fn);
         var res = options.predicate.test(fn);
         if (options.record)
             fs.appendFileSync(options.record, !!res + "\n");
