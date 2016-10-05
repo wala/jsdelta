@@ -4,6 +4,7 @@
   "author": "Max Schaefer <xiemaisi@gmail.com>",
   "description": "A delta debugger for JavaScript",
   "dependencies": {
+    "argparse": "^1.0.9",
     "escodegen": "=1.8.1",
     "esprima": "=2.7.2",
     "estraverse": "=4.2.0",

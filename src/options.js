@@ -1,10 +1,7 @@
 const transformations = require("./transformations"),
     logging = require("./logging");
 
-/**
- * Crude option parsing (should be replaced by proper library)
- */
-function buildOptionsObject(argv) {
+function buildOptionsObject() {
     var options = {
         /** only knock out entire statements */
         quick: false,
@@ -37,68 +34,67 @@ function buildOptionsObject(argv) {
         replay_idx: -1
     };
 
-    // command line option parsing; manual for now
-    // TODO: find good npm package to use
-    var i = 0;
-    for (; i < argv.length; ++i) {
-        var arg = argv[i];
-        if (arg === '--quick' || arg === '-q') {
-            options.quick = true;
-        } else if (arg === '--no-fixpoint') {
-            options.findFixpoint = false;
-        } else if (arg === '--cmd') {
-            if (options.cmd === null)
-                options.cmd = String(argv[++i]);
-            else
-                logging.warn("More than one command specified; ignoring.");
-        } else if (arg === '--timeout') {
-            logging.warn("Timeout ignored.");
-        } else if (arg === '--errmsg') {
-            if (options.errmsg === null)
-                options.errmsg = String(argv[++i]);
-            else
-                logging.warn("More than one error message specified; ignoring.");
-        } else if (arg === '--msg') {
-            if (options.msg === null) {
-                options.msg = String(argv[++i]);
-            } else {
-                logging.warn("More than one message specified; ignoring.");
-            }
-        } else if (arg === '--record') {
-            options.record = argv[++i];
-            if (fs.existsSync(options.record))
-                fs.unlinkSync(options.record);
-        } else if (arg === '--replay') {
-            if (options.cmd) {
-                logging.warn("--replay after --cmd ignored");
-            } else {
-                options.replay = fs.readFileSync(argv[++i], 'utf-8').split('\n');
-                replay_idx = 0;
-            }
-        } else if (arg === "--optimize") {
-            options.optimize = true;
-        } else if (arg === '--dir') {
-            options.multifile_mode = true;
-            options.dir = argv[++i];
-        } else if (arg === '--') {
-            options.file = argv[i + 1];
-            i += 2;
-            break;
-        } else if (arg[0] === '-') {
-            usage();
-        } else {
-            options.file = argv[i++];
-            break;
-        }
+    var argparse = require('argparse');
+    var parser = new argparse.ArgumentParser({
+        addHelp: true,
+        description: "Command-line interface to JSDelta"
+    });
+    parser.addArgument(['--quick', '-q'], {help: "disable reductions of individual expressions.", action: 'storeTrue'});
+    parser.addArgument(['--no-fixpoint'], {
+        help: "disable fixpoint algorithm (faster, but sub-optimal)",
+        action: 'storeTrue'
+    });
+    parser.addArgument(['--optimize'], {
+        help: "enable inlining and constant folding (slower, but more optimal)",
+        action: 'storeTrue'
+    });
+    parser.addArgument(['--cmd'], {help: "command to execute on each iteration"});
+    parser.addArgument(['--record'], {help: "file to store recording in"});
+    parser.addArgument(['--replay'], {help: "file to replay recording from"});
+    parser.addArgument(['--errmsg'], {help: "substring in stderr to look for"});
+    parser.addArgument(['--msg'], {help: "substring in stdout to look for"});
+    parser.addArgument(['--dir'], {help: "directory to reduce (should contain the main file!)"});
+    parser.addArgument(['main-file_and_predicate_and_predicate-args'], {
+        help: "main file to reduce, followed by arguments to the predicate",
+        nargs: argparse.Const.REMAINDER
+    });
+    var args = parser.parseArgs();
+
+    var tail = args['main-file_and_predicate_and_predicate-args'];
+    var file = tail[0];
+    if (!file) {
+        parser.printHelp();
+        process.exit(-1);
+        return;
+    }
+    var predicate = tail[1];
+    var predicateArgs = tail.slice(2);
+
+    options.quick = args.quick;
+    options.optimize = args.quick;
+    options.findFixpoint = !options['no-fixpoint'];
+    options.cmd = args.cmd || options.cmd;
+    options.errmsg = args.errmsg || options.errmsg;
+    options.msg = args.msg || options.msg;
+    if (args.record) {
+        options.record = args.record;
+        if (fs.existsSync(options.record))
+            fs.unlinkSync(options.record);
+    }
+    if (args.replay) {
+        options.replay = fs.readFileSync(args.replay, 'utf-8').split('\n');
+        options.replay_idx = 0;
+    }
+    if (args.dir) {
+        options.multifile_mode = true;
+        options.dir = args.dir;
     }
 
-    // check whether a predicate module was specified
-    if (i < argv.length) {
-        options.predicate = require(argv[i++]);
+    options.file = file;
+    if (predicate) {
+        options.predicate = require(predicate);
     }
-
-    // the remaining arguments will be passed to the predicate
-    options.predicate_args = argv.slice(i);
+    options.predicate_args = predicateArgs;
 
 
     if (options.optimize) {
@@ -108,12 +104,9 @@ function buildOptionsObject(argv) {
     synthesizePredicate(options);
     var origPredicate = options.predicate.test;
     options.predicate.test = function (fn) {
+        // wrap to add indentation argument
         return origPredicate(fn, logging.getIndentation());
     };
-
-    // check that we have something to minimise
-    if (!options.file)
-        usage();
 
     return options;
 }
@@ -208,18 +201,6 @@ function synthesizePredicate(options) {
     }
 }
 
-function usage() {
-    logging.error("Usage: " + process.argv[0] + " " + process.argv[1] +
-        " [-q|--quick] [--no-fixpoint] [--cmd COMMAND]" +
-        " [--record FILE | --replay FILE]" +
-        " [--errmsg ERRMSG] [--msg MSG] [--dir DIR] [--optimize] FILE [PREDICATE] OPTIONS...");
-    //process.exit(-1);
-}
-module.exports.parseOptions = function (options) {
-    try {
-        return buildOptionsObject(options);
-    } catch (e) {
-        usage();
-        throw e;
-    }
+module.exports.parseOptions = function () {
+    return buildOptionsObject();
 };

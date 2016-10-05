@@ -14,7 +14,7 @@
 const delta_single = require("./src/delta_single"),
     delta_multi = require("./src/delta_multi");
 
-var options = require("./src/options").parseOptions(process.argv.slice(2));
+var options = require("./src/options").parseOptions();
 
 if (options.multifile_mode) {
     delta_multi.reduce(options);
