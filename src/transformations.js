@@ -33,7 +33,7 @@ function transformAndTest(transformation, options, state, file) {
         var transformed = file_util.getTempFileName(state);
         try {
             transformation(orig, transformed);
-            fs.writeFileSync(transformed, fs.readFileSync(transformed, 'utf-8').trim());
+            fs.writeFileSync(transformed, fs.readFileSync(transformed, 'utf-8').trim() + "\n");
 
             // ensure termination of transformation fixpoint
             var reducedSize = getFileCodeSize(transformed) < getFileCodeSize(orig);

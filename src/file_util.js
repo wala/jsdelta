@@ -16,7 +16,7 @@ function writeTempFile(state) {
 }
 
 function persistAST(file, state) {
-    fs.writeFileSync(file, pp(state).trim());
+    fs.writeFileSync(file, pp(state).trim() + "\n");
 }
 
 function pp(state) {
