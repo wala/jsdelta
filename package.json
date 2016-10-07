@@ -12,7 +12,8 @@
     "fs-extra": "=0.30.0",
     "google-closure-compiler": "=20160911.0.0",
     "hash-files": "=1.1.1",
-    "node-fs-extra": "=0.8.1"
+    "node-fs-extra": "=0.8.1",
+    "tmp" : "0.0.29"
   },
   "license": "EPL-1.0",
   "repository": {

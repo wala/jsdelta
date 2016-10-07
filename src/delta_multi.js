@@ -3,7 +3,8 @@ const path = require("path"),
     config = require("../config"),
     delta_single = require("./delta_single"),
     hashFiles = require("hash-files"),
-    logging = require("./logging");
+    logging = require("./logging"),
+    tmp = require("tmp");
 
 
 /**
@@ -27,11 +28,11 @@ function main(options) {
         backupFile: undefined
     };
 
-    state.tmpDir = fs.mkdtempSync(config.tmp_dir + "/jsdelta-multifile-");
+    state.tmpDir = tmp.dirSync({template : config.tmp_dir + "/jsdelta-multifile-XXXXXX"}).name;
     fs.copySync(options.dir, state.tmpDir);
     state.mainFileTmpDir = path.resolve(state.tmpDir, options.file);
 
-    var tmpBackupDir = fs.mkdtempSync(config.tmp_dir + "/backup-");
+    var tmpBackupDir = tmp.dirSync({template : config.tmp_dir + "/backup-XXXXXX"}).name;
     state.backupDir = path.resolve(tmpBackupDir, "backupDir");
     state.backupFile = path.resolve(tmpBackupDir, "backup");
 
