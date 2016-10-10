@@ -1,5 +1,5 @@
-const fs = require("fs"),
-    cp = require("child_process"),
+const fs = require("node-fs-extra"),
+    path = require("path"),
     escodegen = require("escodegen"),
     esprima = require("esprima");
 // get name of current test case
@@ -44,11 +44,16 @@ function parse(input) {
     }
 }
 
-function du_sb(file) {
-    var rawOut = cp.spawnSync('du', ['-sb', file]).stdout;
-    var out = String(rawOut).trim();
-    var extractor = /([^\t]+).*/;
-    return extractor.exec(out)[1];
+function du_sb (file) {
+    var size = 0;
+    var fileStat = fs.statSync(file);
+    if (fileStat.isDirectory()) {
+        fs.readdirSync(file).forEach(function (child) {
+            size += du_sb(path.resolve(file, child));
+        });
+    }
+    size += fileStat.size;
+    return size;
 }
 
 module.exports.du_sb = du_sb;
