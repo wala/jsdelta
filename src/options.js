@@ -111,7 +111,11 @@ function buildOptionsObject() {
 
     options.file = file;
     if (predicate) {
-        options.predicate = require(predicate);
+        if (path.isAbsolute(predicate)) {
+            options.predicate = require(predicate);
+        } else {
+            options.predicate = require(process.cwd() + "/" + predicate);
+        }
     }
     options.predicate_args = predicateArgs;
 
