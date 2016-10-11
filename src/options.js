@@ -1,5 +1,6 @@
 const transformations = require("./transformations"),
-    logging = require("./logging");
+    logging = require("./logging"),
+    path = require("path");
 
 function buildOptionsObject() {
     var options = {
@@ -31,6 +32,8 @@ function buildOptionsObject() {
         multifile_mode: false,
         /** directory to minimize when multifile_mode is enabled*/
         dir: null,
+        /** output directory of the minimized program */
+        out : null,
         replay_idx: -1
     };
 
@@ -54,6 +57,7 @@ function buildOptionsObject() {
     parser.addArgument(['--errmsg'], {help: "substring in stderr to look for"});
     parser.addArgument(['--msg'], {help: "substring in stdout to look for"});
     parser.addArgument(['--dir'], {help: "directory to reduce (should contain the main file!)"});
+    parser.addArgument(['--out'], {help: "directory to move the minimized output to"});
     parser.addArgument(['main-file_and_predicate_and_predicate-args'], {
         help: "main file to reduce, followed by arguments to the predicate",
         nargs: argparse.Const.REMAINDER
@@ -88,6 +92,20 @@ function buildOptionsObject() {
     if (args.dir) {
         options.multifile_mode = true;
         options.dir = args.dir;
+    }
+    if (args.out) {
+        //var hasExtension = path.extname(args.out) !== '';
+        //if (hasExtension && options.multifile_mode) {
+        //    logging.error("the out path must be a folder in multi file mode");
+        //    process.exit(-1);
+        //    return;
+        //}
+        //if (!hasExtension && !options.multifile_mode)  {
+        //    logging.error("the out path must be a file in single file mode");
+        //    process.exit(-1);
+        //    return;
+        //}
+        options.out = args.out;
     }
 
     options.file = file;

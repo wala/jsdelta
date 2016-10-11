@@ -1,4 +1,4 @@
-var fs = require("fs"),
+var fs = require("node-fs-extra"),
     util = require("util"),
     esprima = require("esprima"),
     escodegen = require("escodegen"),
@@ -67,7 +67,17 @@ function main(options) {
             }
         }
         if (!options.multifile_mode) {
-            logging.logDone(smallest);
+            if (options.out !== null) {
+                var copyPath = file_util.copyToDir(smallest, options.out);
+                if (copyPath !== undefined) {
+                    logging.logDone(copyPath);
+                } else {
+                    logging.error("unable to copy result to " + options.out);
+                    logging.logDone(smallest);
+                }
+            } else {
+                logging.logDone(smallest);
+            }
         }
     } else {
         logging.error("Original file doesn't satisfy predicate.");
@@ -259,7 +269,6 @@ function main(options) {
                 }
         }
     }
-
 
     function Replace(nd, idx) {
         var oldval = nd[idx];

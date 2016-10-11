@@ -4,7 +4,8 @@ const path = require("path"),
     delta_single = require("./delta_single"),
     hashFiles = require("hash-files"),
     logging = require("./logging"),
-    tmp = require("tmp");
+    tmp = require("tmp"),
+    file_util = require("./file_util");
 
 
 /**
@@ -48,7 +49,18 @@ function main(options) {
         newSha = computeSha(state.tmpDir);
         count++;
     } while (options.findFixpoint && newSha !== prevSha);
-    logging.logDone(state.tmpDir);
+
+    if (options.out !== null) {
+        var copyPath = file_util.copyToDir(state.tmpDir, options.out);
+        if (copyPath !== undefined) {
+            logging.logDone(copyPath);
+        } else {
+            logging.error("unable to copy result to " + options.out);
+            logging.logDone(state.tmpDir);
+        }
+    } else {
+        logging.logDone(state.tmpDir);
+    }
 
     function makeOptionsForSingleFileMode(file) {
         var singleOptions = {};

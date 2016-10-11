@@ -1,4 +1,4 @@
-const fs = require("node-fs-extra"),
+const fs = require("fs-extra"),
     path = require("path"),
     escodegen = require("escodegen"),
     esprima = require("esprima");
@@ -56,9 +56,20 @@ function du_sb (file) {
     return size;
 }
 
+//Return path to file if copy was successful. Return undefined otherwise.
+function copyToOut(src, out, multiFileMode) {
+    try {
+        fs.copySync(src, out);
+        fs.statSync(out)
+        return out;
+    } catch (err) {
+    }
+}
+
 module.exports.du_sb = du_sb;
 module.exports.getTempFileName = getTempFileName;
 module.exports.writeTempFile = writeTempFile;
 module.exports.persistAST = persistAST;
 module.exports.pp = pp;
 module.exports.parse = parse;
+module.exports.copyToDir = copyToOut
