@@ -1,4 +1,4 @@
-var fs = require("node-fs-extra"),
+var fs = require("fs-extra"),
     util = require("util"),
     esprima = require("esprima"),
     escodegen = require("escodegen"),

@@ -1,5 +1,5 @@
 const path = require("path"),
-    fs = require("node-fs-extra"),
+    fs = require("fs-extra"),
     config = require("../config"),
     delta_single = require("./delta_single"),
     hashFiles = require("hash-files"),
