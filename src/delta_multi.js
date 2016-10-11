@@ -93,7 +93,7 @@ function main(options) {
         var dir = options.dir;
         var file = options.file;
         if (!path.isAbsolute(dir)) {
-            dir = path.resolve(__dirname, dir);
+            dir = path.resolve(process.cwd(), dir);
         }
         var mainFileFullPath = path.resolve(dir, file);
         try {
