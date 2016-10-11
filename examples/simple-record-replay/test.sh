@@ -8,8 +8,13 @@ BASENAME=${MAIN_FILE_FOLDER##*/};
 TMP_FOLDER="${ROOT}/examples/tmp";
 TMP_OUT="${TMP_FOLDER}/${BASENAME}";
 
-#Run delta.js
-${ROOT}/delta.js --out ${TMP_OUT} ${MAIN_FILE_FOLDER}/main.js ${PREDICATE} >/dev/null;
+RECORD_FILE="${TMP_FOLDER}/record"
+
+#Run delta.js record
+${ROOT}/delta.js --record ${RECORD_FILE} --out ${TMP_OUT} ${MAIN_FILE_FOLDER}/main.js ${PREDICATE} >/dev/null;
+
+#Run delta.js replay
+${ROOT}/delta.js --replay ${RECORD_FILE} --out ${TMP_OUT} ${MAIN_FILE_FOLDER}/main.js ${PREDICATE} >/dev/null;
 
 #Check that output is smaller than input
 ${ROOT}/util/cmp-size.js ${MAIN_FILE_FOLDER} ${TMP_OUT};

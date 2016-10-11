@@ -1,6 +1,7 @@
 const transformations = require("./transformations"),
     logging = require("./logging"),
-    path = require("path");
+    path = require("path"),
+    fs = require("fs");
 
 function buildOptionsObject() {
     var options = {
