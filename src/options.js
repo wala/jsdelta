@@ -95,17 +95,6 @@ function buildOptionsObject() {
         options.dir = args.dir;
     }
     if (args.out) {
-        //var hasExtension = path.extname(args.out) !== '';
-        //if (hasExtension && options.multifile_mode) {
-        //    logging.error("the out path must be a folder in multi file mode");
-        //    process.exit(-1);
-        //    return;
-        //}
-        //if (!hasExtension && !options.multifile_mode)  {
-        //    logging.error("the out path must be a file in single file mode");
-        //    process.exit(-1);
-        //    return;
-        //}
         options.out = args.out;
     }
 
