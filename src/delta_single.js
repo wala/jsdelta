@@ -308,7 +308,7 @@ function main(options) {
         if (options.record)
             fs.appendFileSync(options.record, !!res + "\n");
         if (res) {
-            testSucceededAtLeastOnce = true;
+            state.testSucceededAtLeastOnce = true;
             // if the test succeeded, save it to file 'smallest'
             file_util.persistAST(smallest, state);
             return true;
