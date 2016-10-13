@@ -4,6 +4,8 @@
 # This file is included as source by examples/XYZ/test.sh
 #
 
+set -e
+
 ROOT="${MAIN_FILE_FOLDER}/../..";
 
 BASENAME=${MAIN_FILE_FOLDER##*/};

@@ -4,6 +4,8 @@
 # This file is included as source by examples/XYZ/test.sh
 #
 
+set +e
+
 #Check that output is smaller than input
 ${ROOT}/util/cmp-size.js ${MAIN_FILE_FOLDER} ${TMP_OUT};
 EXIT_CODE=$?;
