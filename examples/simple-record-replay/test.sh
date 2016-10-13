@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
 
 MAIN_FILE_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
-ROOT="${MAIN_FILE_FOLDER}/../..";
+source "${MAIN_FILE_FOLDER}/../../util/example_setup.sh";
 PREDICATE="${ROOT}/examples/predicates/pred.js";
-
-BASENAME=${MAIN_FILE_FOLDER##*/};
-TMP_FOLDER="${ROOT}/examples/tmp";
-TMP_OUT="${TMP_FOLDER}/${BASENAME}";
 
 RECORD_FILE="${TMP_FOLDER}/record"
 
@@ -16,14 +12,5 @@ ${ROOT}/delta.js --record ${RECORD_FILE} --out ${TMP_OUT} ${MAIN_FILE_FOLDER}/ma
 #Run delta.js replay
 ${ROOT}/delta.js --replay ${RECORD_FILE} --out ${TMP_OUT} ${MAIN_FILE_FOLDER}/main.js ${PREDICATE} >/dev/null;
 
-#Check that output is smaller than input
-${ROOT}/util/cmp-size.js ${MAIN_FILE_FOLDER} ${TMP_OUT};
-EXIT_CODE=$?;
+source "${MAIN_FILE_FOLDER}/../../util/example_teardown.sh";
 
-#Fail if output is not smaller than input
-if [[ ${EXIT_CODE} == 0 ]]; then
-    echo "TEST FAIL: minimized program is larger than the input";
-    exit -1;
-else
-    echo "TEST OK: reduced program is smaller than the input";
-fi

@@ -5,7 +5,6 @@
 #
 
 ROOT="${MAIN_FILE_FOLDER}/../..";
-PREDICATE="${ROOT}/examples/predicates/pred.js";
 
 BASENAME=${MAIN_FILE_FOLDER##*/};
 TMP_FOLDER="${ROOT}/examples/tmp";
