@@ -7,8 +7,7 @@ EXAMPLES="${ROOT}/examples";
 # Execute all shell scripts in the example subfolder
 
 find ${EXAMPLES} -name '*.sh' | while read line; do
-    #chmod +x ${line}
     echo "minimizing: ${line}"
-    ${line}
+    bash ${line}
 done
 
