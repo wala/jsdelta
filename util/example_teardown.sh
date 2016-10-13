@@ -15,3 +15,5 @@ if [[ ${EXIT_CODE} == 0 ]]; then
 else
     echo "TEST OK: reduced program is smaller than the input";
 fi
+
+rm -r ${TMP_OUT}
