@@ -41,13 +41,41 @@ A slightly more convenient (but less general) way of writing a predicate is to i
 
 Finally, you can specify the predicate implicitly through command line arguments: invoking JS Delta with arguments
 
-> jsdelta --cmd CMD --errmsg ERR file-to-reduce.js
+```
+$ jsdelta --cmd CMD --errmsg ERR file-to-reduce.js
+```
 
 takes `CMD` to be the command to execute; the predicate is deemed to hold if the command outputs an error message (i.e., on stderr) containing string `ERR`. To check for a message on either stderr or stdout, use the `--msg` option instead.  Note that `CMD` is run with the minimized version of the input file as its only argument. If your command needs other arguments, you may need to write a wrapper script that invokes it with the right arguments.
 
 As a special case, you can run your analysis using the `timeout.sh` script bundled with JS Delta, which will output the error message `TIMEOUT` if the given timeout is exceeded; this can be detected by specifying `--errmsg TIMEOUT`.
 
 Finally, you can just specify a command (without providing the `--errmsg` or `--msg` flags), in which case the predicate is deemed to hold if the command exits with an error.
+
+Examples
+--------
+
+Example usages of all options can be found in [examples](examples)/xyz/test.sh. 
+The examples contain some extra code to facitilate testing, the line of interest is the one that invokes jsdelta. 
+
+A concrete example (seen in full in [test.sh](examples/simple-cmd-stderr/test.sh)) of the abstract command above can be seen below:
+```
+$ ./delta.js --cmd examples/predicates/cmd-stderr.js --errmsg fail examples/simple-cmd-stderr/main.js
+```
+
+Tests
+-----
+
+[test.sh](test.sh) runs the tests for this project. 
+It attempts to run all test.sh file in the [examples](examples)-directory, failing if any of them fail.
+Besides testing that the examples do not crash, each test also check that the reduced output is smaller than the input.
+
+
+New'ish features
+-----------------
+
+- `--dir DIR`: the content of the `DIR` directory will be reduced: files/directories will be deleted and .js-files will be reduced as usual. Note that .js files are not required to be present at all, so JS Delta is capable of finding an abitrary subset of files that satisfy a predicate.
+- `--optimize`: the closure compiler will perform its optimizations on the reduced JavaScript files. This can lead to significantly smaller files than otherwise, especially if it is able to inline function calls.
+- `--out FILE`: the reduced file (or directory) will be copied to `DIR`
 
 License
 -------
