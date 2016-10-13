@@ -7,7 +7,7 @@ EXAMPLES="${ROOT}/examples";
 # Execute all shell scripts in the example subfolder
 
 find ${EXAMPLES} -name '*.sh' | while read line; do
-    echo "minimizing: ${line}"
+    echo "Running test: ${line}."
     bash ${line}
 done
 
