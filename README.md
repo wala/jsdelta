@@ -51,6 +51,37 @@ As a special case, you can run your analysis using the `timeout.sh` script bundl
 
 Finally, you can just specify a command (without providing the `--errmsg` or `--msg` flags), in which case the predicate is deemed to hold if the command exits with an error.
 
+All the usages of JS Delta can be shown by running the command line tool without arguments:
+
+```
+$ ./delta.js
+usage: delta.js [-h] [--quick] [--no-fixpoint] [--optimize] [--cmd CMD]
+                [--record RECORD] [--replay REPLAY] [--errmsg ERRMSG]
+                [--msg MSG] [--dir DIR] [--out OUT]
+                ...
+
+Command-line interface to JSDelta
+
+Positional arguments:
+  main-file_and_predicate_and_predicate-args
+                        main file to reduce, followed by arguments to the 
+                        predicate
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  --quick, -q           disable reductions of individual expressions.
+  --no-fixpoint         disable fixpoint algorithm (faster, but sub-optimal)
+  --optimize            enable inlining and constant folding (slower, but 
+                        more optimal)
+  --cmd CMD             command to execute on each iteration
+  --record RECORD       file to store recording in
+  --replay REPLAY       file to replay recording from
+  --errmsg ERRMSG       substring in stderr to look for
+  --msg MSG             substring in stdout to look for
+  --dir DIR             directory to reduce (should contain the main file!)
+  --out OUT             directory to move the minimized output to
+```
+
 Examples
 --------
 
