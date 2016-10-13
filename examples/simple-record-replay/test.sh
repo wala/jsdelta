@@ -13,4 +13,5 @@ ${ROOT}/delta.js --record ${RECORD_FILE} --out ${TMP_OUT} ${MAIN_FILE_FOLDER}/ma
 ${ROOT}/delta.js --replay ${RECORD_FILE} --out ${TMP_OUT} ${MAIN_FILE_FOLDER}/main.js ${PREDICATE} >/dev/null;
 
 source "${MAIN_FILE_FOLDER}/../../util/example_teardown.sh";
+rm ${RECORD_FILE}
 
