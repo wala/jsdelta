@@ -2,14 +2,14 @@
 
 MAIN_FILE_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 ROOT="${MAIN_FILE_FOLDER}/../..";
-PREDICATE="${ROOT}/examples/predicates/pred.js";
+PREDICATE="${ROOT}/examples/predicates/cmd-stderr.js";
 
 BASENAME=${MAIN_FILE_FOLDER##*/};
 TMP_FOLDER="${ROOT}/examples/tmp";
 TMP_OUT="${TMP_FOLDER}/${BASENAME}";
 
 #Run delta.js
-${ROOT}/delta.js --out ${TMP_OUT} --dir ${MAIN_FILE_FOLDER} main-file-folder/main.js ${PREDICATE} >/dev/null
+${ROOT}/delta.js --out ${TMP_OUT} --cmd ${PREDICATE} --errmsg "fail" ${MAIN_FILE_FOLDER}/main.js  >/dev/null;
 
 #Check that output is smaller than input
 ${ROOT}/util/cmp-size.js ${MAIN_FILE_FOLDER} ${TMP_OUT};

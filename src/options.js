@@ -1,7 +1,8 @@
 const transformations = require("./transformations"),
     logging = require("./logging"),
     path = require("path"),
-    fs = require("fs");
+    fs = require("fs")
+    util = require("util");
 
 function buildOptionsObject() {
     var options = {
@@ -127,10 +128,10 @@ function buildOptionsObject() {
 function execSync(cmd) {
     try {
         require('child_process').execSync(cmd);
-        return false;
     } catch (e) {
-        return true;
+        return e.status;
     }
+    return 0;
 }
 
 function synthesizePredicate(options) {
@@ -201,9 +202,8 @@ function synthesizePredicate(options) {
                 var start = new Date();
                 var stdout_file = fn + ".stdout",
                     stderr_file = fn + ".stderr";
-                var error = execSync(predicate.cmd + " '" + fn + "'" +
-                    " >'" + stdout_file + "'" +
-                    " 2>'" + stderr_file + "'");
+                var str = util.format("%s '%s' >'%s' 2>'%s'", predicate.cmd, fn, stdout_file, stderr_file);
+                var error = execSync(str);
                 var end = new Date();
                 var stdout = fs.readFileSync(stdout_file, "utf-8"),
                     stderr = fs.readFileSync(stderr_file, "utf-8");

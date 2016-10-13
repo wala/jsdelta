@@ -2,7 +2,7 @@
 
 MAIN_FILE_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 ROOT="${MAIN_FILE_FOLDER}/../..";
-PREDICATE="${ROOT}/examples/pred.js";
+PREDICATE="${ROOT}/examples/predicates/pred.js";
 
 BASENAME=${MAIN_FILE_FOLDER##*/};
 TMP_FOLDER="${ROOT}/examples/tmp";
