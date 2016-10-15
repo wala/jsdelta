@@ -9,3 +9,7 @@ node_js:
   - "5"
   - "4"
   - "3"
+
+os:
+  - linux
+  - osx
