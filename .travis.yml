@@ -1,0 +1,15 @@
+language: node_js
+
+install:
+- npm install
+
+node_js:
+  - "6"
+  - "5"
+  - "5"
+  - "4"
+  - "3"
+
+os:
+  - linux
+  - osx
