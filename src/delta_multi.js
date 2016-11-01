@@ -18,7 +18,7 @@ function main(options) {
     logging.log("Running in multifile mode");
 
 
-    checkMultiFileModeOptions(options);
+    checkMultiFileModeOptions();
 
     // setup
     var state = {
@@ -105,7 +105,7 @@ function main(options) {
     }
 
     function readDirSorted(directory) {
-        files = [];
+        var files = [];
         fs.readdirSync(directory).forEach(function (child) {
             files.push(path.resolve(directory, child));
         });

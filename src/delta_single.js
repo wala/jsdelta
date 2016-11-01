@@ -29,7 +29,7 @@ function main(options) {
     state.ext = (options.file.match(/\.(\w+)$/) || [, 'js'])[1];
 
     // determine a suitable temporary directory
-    for (i = 0; fs.existsSync(state.tmp_dir = config.tmp_dir + "/tmp" + i); ++i);
+    for (var i = 0; fs.existsSync(state.tmp_dir = config.tmp_dir + "/tmp" + i); ++i);
     fs.mkdirSync(state.tmp_dir);
 
     // the smallest test case so far is kept here
