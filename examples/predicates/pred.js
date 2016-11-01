@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 var execSucc = function (filename) {
     var process = require("child_process");
+    var output = null;
     const options = {
         stdio: "pipe"
     };
