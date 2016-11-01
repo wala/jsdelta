@@ -8,7 +8,6 @@
     "escodegen": "=1.8.1",
     "esprima": "=2.7.2",
     "estraverse": "=4.2.0",
-    "execSync": "=1.0.2",
     "fs-extra": "=0.30.0",
     "google-closure-compiler": "=20160911.0.0",
     "hash-files": "=1.1.1",
