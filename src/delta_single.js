@@ -28,6 +28,17 @@ function main(options) {
     // figure out file extension; default is 'js'
     state.ext = (options.file.match(/\.(\w+)$/) || [, 'js'])[1];
 
+    if (state.ext === 'json') {
+        // hack to make JSON work: empty program is not valid json!
+        var origPredicate = options.predicate.test;
+        options.predicate.test = function (fn) {
+            var input = fs.readFileSync(fn, 'utf-8');
+            if (input.trim() === ''){
+              return false;
+            }
+            return origPredicate(fn);
+        };
+    }
     // determine a suitable temporary directory
     for (var i = 0; fs.existsSync(state.tmp_dir = config.tmp_dir + "/tmp" + i); ++i);
     fs.mkdirSync(state.tmp_dir);
@@ -42,8 +53,12 @@ function main(options) {
     fs.writeFileSync(orig, input);
     fs.writeFileSync(smallest, input);
 
-    rebuildAST();
-
+    try {
+        rebuildAST();
+    } catch (e) {
+        logging.error("Original file is not syntactically valid.");
+        process.exit(-1);
+    }
     // get started
     var res = options.predicate.test(orig);
     if (options.record)
@@ -297,7 +312,6 @@ function main(options) {
         // hack to make JSON work
         if (state.ext === 'json')
             input = '(' + input + ')';
-
         state.ast = file_util.parse(input);
     }
 
@@ -319,4 +333,3 @@ function main(options) {
 
 }
 module.exports.reduce = main;
-
