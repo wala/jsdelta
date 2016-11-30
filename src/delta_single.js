@@ -23,18 +23,38 @@ function main(options) {
         ext: undefined
     };
 
-    var input = fs.readFileSync(options.file, 'utf-8');
+    var input;
+    try {
+        input = fs.readFileSync(options.file, 'utf-8');
+    } catch (e) {
+        logging.error("Could not read original file: %s", e);
+        process.exit(1);
+    }
 
     // figure out file extension; default is 'js'
     state.ext = (options.file.match(/\.(\w+)$/) || [, 'js'])[1];
 
+    function isSyntacticallyValid(input) {
+        try {
+            if (state.ext === 'json') {
+                console.log(input);
+                JSON.parse(input);
+            } else {
+                file_util.parse(input);
+            }
+        } catch (e) {
+            return false;
+        }
+        return true;
+    }
+
     if (state.ext === 'json') {
-        // hack to make JSON work: empty program is not valid json!
+        // hack to always generate valid JSON: e.g. empty program is not valid JSON, but it is valid JavaScript!
         var origPredicate = options.predicate.test;
         options.predicate.test = function (fn) {
             var input = fs.readFileSync(fn, 'utf-8');
-            if (input.trim() === ''){
-              return false;
+            if (!isSyntacticallyValid(input)) {
+                return false;
             }
             return origPredicate(fn);
         };
@@ -53,12 +73,11 @@ function main(options) {
     fs.writeFileSync(orig, input);
     fs.writeFileSync(smallest, input);
 
-    try {
-        rebuildAST();
-    } catch (e) {
+    if (!isSyntacticallyValid(input)) {
         logging.error("Original file is not syntactically valid.");
-        process.exit(-1);
+        process.exit(1);
     }
+
     // get started
     var res = options.predicate.test(orig);
     if (options.record)
@@ -96,7 +115,7 @@ function main(options) {
         }
     } else {
         logging.error("Original file doesn't satisfy predicate.");
-        process.exit(-1);
+        process.exit(1);
     }
 
     var DEBUG = false;
