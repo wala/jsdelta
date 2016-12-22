@@ -120,7 +120,7 @@ function main(options) {
         if (options.findFixpoint && state.testSucceededAtLeastOnce) {
             done = false;
         }
-        performedAtLeastOneReduction |= state.testSucceededAtLeastOnce
+        performedAtLeastOneReduction |= state.testSucceededAtLeastOnce;
     }
     if (!options.multifile_mode) {
         if (options.out !== null) {
