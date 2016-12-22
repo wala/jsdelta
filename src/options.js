@@ -77,7 +77,7 @@ function buildOptionsObject() {
     var predicateArgs = tail.slice(2);
 
     options.quick = args.quick;
-    options.optimize = args.quick;
+    options.optimize = args.optimize;
     options.findFixpoint = !options['no-fixpoint'];
     options.cmd = args.cmd || options.cmd;
     options.errmsg = args.errmsg || options.errmsg;
