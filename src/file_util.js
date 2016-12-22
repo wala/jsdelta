@@ -1,6 +1,8 @@
 const fs = require("fs-extra"),
     path = require("path"),
+    tmp = require("tmp"),
     escodegen = require("escodegen"),
+    config = require("../config"),
     esprima = require("esprima");
 // get name of current test case
 function getTempFileName(state) {
@@ -66,6 +68,13 @@ function copyToOut(src, out, multiFileMode) {
     }
 }
 
+/**
+ * Create a fresh temporary directory. Returns the name of the directory.
+ */
+function makeTempDir(){
+    return tmp.dirSync({prefix: "jsdelta-", dir: config.tmp_dir}).name;
+}
+
 module.exports.du_sb = du_sb;
 module.exports.getTempFileName = getTempFileName;
 module.exports.writeTempFile = writeTempFile;
@@ -73,3 +82,4 @@ module.exports.persistAST = persistAST;
 module.exports.pp = pp;
 module.exports.parse = parse;
 module.exports.copyToDir = copyToOut
+module.exports.makeTempDir = makeTempDir;
