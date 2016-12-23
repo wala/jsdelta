@@ -3,17 +3,34 @@ var fs = require("fs-extra"),
     esprima = require("esprima"),
     escodegen = require("escodegen"),
     estraverse = require("estraverse"),
+    tmp = require("tmp"),
     file_util = require("./file_util"),
     transformations = require("./transformations"),
-    config = require("../config"),
     logging = require("./logging");
 /**
  * The "Original" JSDelta AST-mininizer.
  *
  * Repeatedly eliminates parts of an AST and applies a predicate to the resulting source code.
  * Stops when a (locally) minimal source that satisfies the predicate has been found.
+ *
+ * @return boolean true if at least one reduction was performed successfully.
  */
 function main(options) {
+
+    function invalidInput() {
+        if (!options.multifile_mode) {
+            process.exit(1);
+        }
+        return false;
+    }
+
+    var DEBUG = false;
+
+    function log_debug(msg) {
+        if (DEBUG)
+            logging.log(msg);
+    }
+
     var state = {
         // keep track of the number of attempts so far
         round: 0,
@@ -28,7 +45,7 @@ function main(options) {
         input = fs.readFileSync(options.file, 'utf-8');
     } catch (e) {
         logging.error("Could not read original file: %s", e);
-        process.exit(1);
+        return invalidInput();
     }
 
     // figure out file extension; default is 'js'
@@ -59,9 +76,7 @@ function main(options) {
             return origPredicate(fn);
         };
     }
-    // determine a suitable temporary directory
-    for (var i = 0; fs.existsSync(state.tmp_dir = config.tmp_dir + "/tmp" + i); ++i);
-    fs.mkdirSync(state.tmp_dir);
+    state.tmp_dir = file_util.makeTempDir();
 
     // the smallest test case so far is kept here
     var smallest = state.tmp_dir + "/delta_js_smallest." + state.ext;
@@ -75,55 +90,52 @@ function main(options) {
 
     if (!isSyntacticallyValid(input)) {
         logging.error("Original file is not syntactically valid.");
-        process.exit(1);
+        return invalidInput();
     }
 
     // get started
     var res = options.predicate.test(orig);
+    if (!res) {
+        logging.error("Original file doesn't satisfy predicate.");
+        return invalidInput();
+    }
+
     if (options.record)
         fs.appendFileSync(options.record, !!res + "\n");
-    if (res) {
-        var done = false;
-        var iterations = 0;
-        while (!done) {
-            logging.log("Starting iteration #%d", iterations);
-            state.testSucceededAtLeastOnce = false;
-            iterations++;
-            done = true;
 
-            rebuildAST();
-            minimise(state.ast, null, -1);
+    var done = false;
+    var iterations = 0;
+    var performedAtLeastOneReduction = false;
+    while (!done) {
+        logging.log("Starting iteration #%d", iterations);
+        state.testSucceededAtLeastOnce = false;
+        iterations++;
+        done = true;
 
-            state.testSucceededAtLeastOnce |= transformations.applyTransformers(options, state, smallest);
+        rebuildAST();
+        minimise(state.ast, null, -1);
 
-            if (options.findFixpoint && state.testSucceededAtLeastOnce) {
-                done = false;
-            }
+        state.testSucceededAtLeastOnce |= transformations.applyTransformers(options, state, smallest);
+
+        if (options.findFixpoint && state.testSucceededAtLeastOnce) {
+            done = false;
         }
-        if (!options.multifile_mode) {
-            if (options.out !== null) {
-                var copyPath = file_util.copyToDir(smallest, options.out);
-                if (copyPath !== undefined) {
-                    logging.logDone(copyPath);
-                } else {
-                    logging.error("unable to copy result to " + options.out);
-                    logging.logDone(smallest);
-                }
+        performedAtLeastOneReduction |= state.testSucceededAtLeastOnce;
+    }
+    if (!options.multifile_mode) {
+        if (options.out !== null) {
+            var copyPath = file_util.copyToDir(smallest, options.out);
+            if (copyPath !== undefined) {
+                logging.logDone(copyPath);
             } else {
+                logging.error("unable to copy result to " + options.out);
                 logging.logDone(smallest);
             }
+        } else {
+            logging.logDone(smallest);
         }
-    } else {
-        logging.error("Original file doesn't satisfy predicate.");
-        process.exit(1);
     }
-
-    var DEBUG = false;
-
-    function log_debug(msg) {
-        if (DEBUG)
-            logging.log(msg);
-    }
+    return performedAtLeastOneReduction;
 
     function minimise_array(array, nonempty) {
         log_debug("minimising array " + util.inspect(array, false, 1));

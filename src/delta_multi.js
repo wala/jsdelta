@@ -1,8 +1,6 @@
 const path = require("path"),
     fs = require("fs-extra"),
-    config = require("../config"),
     delta_single = require("./delta_single"),
-    hashFiles = require("hash-files"),
     logging = require("./logging"),
     tmp = require("tmp"),
     file_util = require("./file_util");
@@ -25,30 +23,25 @@ function main(options) {
         mainFileTmpDir: undefined,
         fileUnderTest: undefined,
         tmpDir: undefined,
-        backupDir: undefined,
-        backupFile: undefined
+        backupDir: undefined
     };
 
-    state.tmpDir = tmp.dirSync({template : config.tmp_dir + "/jsdelta-multifile-XXXXXX"}).name;
+    var tmpRoot = file_util.makeTempDir();
+    state.tmpDir = tmpRoot + "/temp";
     fs.copySync(options.dir, state.tmpDir);
+    state.backupDir = tmpRoot + "/backup";
+    fs.mkdirSync(state.backupDir);
+
     state.mainFileTmpDir = path.resolve(state.tmpDir, options.file);
-
-    var tmpBackupDir = tmp.dirSync({template : config.tmp_dir + "/backup-XXXXXX"}).name;
-    state.backupDir = path.resolve(tmpBackupDir, "backupDir");
-    state.backupFile = path.resolve(tmpBackupDir, "backup");
-
 
     //Repeat delta debugging until no changes are registered
     var count = 1;
-    var newSha = computeSha(state.tmpDir);
-    var prevSha = "";
+    var performedAtLeastOneReduction = false;
     do {
         logging.log("Multifile fixpoint iteration: #" + count);
-        deltaDebugFiles(state.tmpDir);
-        prevSha = newSha;
-        newSha = computeSha(state.tmpDir);
+        performedAtLeastOneReduction = deltaDebugFiles(state.tmpDir);
         count++;
-    } while (options.findFixpoint && newSha !== prevSha);
+    } while (options.findFixpoint && performedAtLeastOneReduction);
 
     if (options.out !== null) {
         var copyPath = file_util.copyToDir(state.tmpDir, options.out);
@@ -74,14 +67,15 @@ function main(options) {
         //Predicate wrapper
         singleOptions.predicate = {
             test: function (deltaReducedFile) {
-                fs.copySync(state.fileUnderTest, state.backupFile);
+                var backup = makeBackupFileName();
+                fs.renameSync(state.fileUnderTest, backup);
                 fs.copySync(deltaReducedFile, state.fileUnderTest);
                 state.mainFileTmpDir = path.resolve(state.tmpDir, options.file);
                 var res = options.predicate.test(state.mainFileTmpDir);
 
                 //Restore backed-up file if new version fails the predicate
                 if (!res) {
-                    fs.copySync(state.backupFile, state.fileUnderTest);
+                    fs.renameSync(backup, state.fileUnderTest);
                 }
                 return res;
             }
@@ -112,16 +106,6 @@ function main(options) {
         return files.sort();
     }
 
-    function computeSha(directory) {
-        var subFiles = listFilesRecursively(directory);
-        const shaOptions = {
-            files: subFiles,
-            algorithm: "sha1",
-            noGlob: true
-        };
-        return hashFiles.sync(shaOptions);
-    }
-
     function listFilesRecursively(file) {
         var subFiles = [];
         fs.readdirSync(file).forEach(function (child) {
@@ -137,50 +121,50 @@ function main(options) {
 
     /**
      * Recursively pass through the file-hierarchy and invoke delta_single.main on all files
+     *
+     * @return boolean true if at least one reduction was performed successfully.
      */
     function deltaDebugFiles(file) {
-        logging.increaseIndentation();
-        logging.logTargetChange(file, state.tmpDir);
-        //main file should be the last file to be reduced
-        if (file === state.mainFileTmpDir) {
-            logging.decreaseIndentation();
-            return;
-        }
-        state.fileUnderTest = file;
+        try {
+            logging.increaseIndentation();
+            state.fileUnderTest = file;
+            logging.logTargetChange(file, state.tmpDir);
 
-        if (fs.statSync(file).isDirectory()) {
-            readDirSorted(file).forEach(function (child) {
-                if (fs.statSync(child).isDirectory()) {
-                    //Try removing directory completely before delta-debugging
-                    fs.copySync(child, state.backupDir);
-                    fs.removeSync(child);
-                    if (!options.predicate.test(state.mainFileTmpDir)) {
-                        fs.copySync(state.backupDir, child);
-                        deltaDebugFiles(child);
-                    }
+            // try removing fileUnderTest completely
+            var backup = makeBackupFileName();
+            fs.renameSync(file, backup);
+            if (options.predicate.test(state.mainFileTmpDir)) {
+                return true;
+            } else {
+                // if that fails, then restore the fileUnderTest
+                fs.renameSync(backup, file);
+                if (fs.statSync(file).isDirectory()) {
+                    var performedAtLeastOneReduction = false;
+                    readDirSorted(file).forEach(function (child) {
+                        // recurse on all files in the directory
+                        performedAtLeastOneReduction |= deltaDebugFiles(child);
+                    });
+                    return performedAtLeastOneReduction;
                 } else {
-                    deltaDebugFiles(child);
-                }
-            });
-        } else {
-            //try removing fileUnderTest completely before delta-debugging
-            fs.copySync(state.fileUnderTest, state.backupFile);
-            fs.removeSync(state.fileUnderTest);
-
-            //if that fails, then restore the fileUnderTest and try to reduce it
-            if (!options.predicate.test(state.mainFileTmpDir)) {
-                fs.copySync(state.backupFile, state.fileUnderTest);
-                if (isJsOrJsonFile(state.fileUnderTest)) {
-                    delta_single.reduce(makeOptionsForSingleFileMode(file));
+                    // specialized reductions
+                    if (isJsOrJsonFile(file)) {
+                        return delta_single.reduce(makeOptionsForSingleFileMode(file));
+                    }
+                    return false;
                 }
             }
+        } finally {
+            logging.decreaseIndentation();
         }
-        logging.decreaseIndentation();
     }
 
     function isJsOrJsonFile(file) {
         var fileNoCaps = file.toLowerCase();
         return fileNoCaps.endsWith(".js") || fileNoCaps.endsWith(".json");
+    }
+
+    function makeBackupFileName() {
+        return tmp.tmpNameSync({dir: state.backupDir});
     }
 
     function logAndExit(msg) {
