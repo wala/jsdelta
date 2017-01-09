@@ -208,8 +208,12 @@ function main(options) {
             case 'FunctionDeclaration':
             case 'FunctionExpression':
                 if (!options.quick) {
-                    if (nd.type === 'FunctionExpression')
+                    if (nd.type === 'FunctionExpression') {
+                        if (Replace(parent, idx).With({type: "ObjectExpression", "properties": []})){
+                            break;
+                        }
                         Replace(nd, 'name').With(null);
+                    }
                     minimise_array(nd.params);
                 }
                 minimise_array(nd.body.body);
@@ -251,12 +255,17 @@ function main(options) {
                         if (nd.argument && !Replace(nd, 'argument').With(null))
                             minimise(nd, 'argument');
                         break;
-                    case 'CallExpression':
                     case 'NewExpression':
+                        Replace(parent, idx).With({type: "CallExpression", callee: nd.callee, arguments: nd.arguments});
+                        // fallthrough
+                    case 'CallExpression':
                         minimise(nd, 'callee');
                         minimise_array(nd['arguments']);
                         break;
                     case 'ArrayExpression':
+                        if (Replace(parent, idx).With({type: "ObjectExpression", "properties": []})){
+                            break;
+                        }
                         minimise_array(nd.elements);
                         break;
                     case 'IfStatement':
