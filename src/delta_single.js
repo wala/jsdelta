@@ -54,7 +54,6 @@ function main(options) {
     function isSyntacticallyValid(input) {
         try {
             if (state.ext === 'json') {
-                console.log(input);
                 JSON.parse(input);
             } else {
                 file_util.parse(input);
