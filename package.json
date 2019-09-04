@@ -9,7 +9,7 @@
     "esprima": "=2.7.2",
     "estraverse": "=4.2.0",
     "fs-extra": "=0.30.0",
-    "google-closure-compiler": "=20160911.0.0",
+    "google-closure-compiler": "=20190819.0.0",
     "tmp" : "0.0.29"
   },
   "license": "EPL-1.0",
