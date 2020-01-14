@@ -10,7 +10,7 @@
     "estraverse": "=4.2.0",
     "fs-extra": "=0.30.0",
     "google-closure-compiler": "=20200112.0.0",
-    "tmp" : "0.0.29"
+    "tmp" : "0.1.0"
   },
   "license": "EPL-1.0",
   "repository": {
