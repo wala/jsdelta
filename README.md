@@ -19,7 +19,7 @@ This places the `jsdelta` script in your `$PATH` if run with `-g`,
 otherwise in `node_modules/.bin`.  The script is a symlink to the
 `delta.js` source file.
 
-We've tested JS Delta on Linux and Mac OS X.
+We test JS Delta on Linux and Mac OS X using Node.js version 10. The tool may not work correctly on other operating systems or earlier Node.js versions.
 
 Usage
 -----
