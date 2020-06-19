@@ -10,4 +10,4 @@
  *******************************************************************************/
 
 // directory in which to create temporary files
-exports.tmp_dir = "/tmp";
+exports.tmp_dir = require('os').tmpdir();
