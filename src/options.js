@@ -58,10 +58,10 @@ function buildOptionsObject() {
     parser.addArgument(['--replay'], {help: "file to replay recording from"});
     parser.addArgument(['--errmsg'], {help: "substring in stderr to look for"});
     parser.addArgument(['--msg'], {help: "substring in stdout to look for"});
-    parser.addArgument(['--dir'], {help: "directory to reduce (should contain the main file!)"});
+    parser.addArgument(['--dir'], {help: "absolute path to the directory to reduce (should contain the main file!)"});
     parser.addArgument(['--out'], {help: "directory to move the minimized output to"});
     parser.addArgument(['main-file_and_predicate_and_predicate-args'], {
-        help: "main file to reduce, followed by arguments to the predicate",
+        help: "main file to reduce, followed by arguments to the predicate. If the --dir option is used, the main-file should be a relative path starting at DIR",
         nargs: argparse.Const.REMAINDER
     });
     var args = parser.parseArgs();

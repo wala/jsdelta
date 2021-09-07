@@ -65,7 +65,8 @@ Command-line interface to JSDelta
 Positional arguments:
   main-file_and_predicate_and_predicate-args
                         main file to reduce, followed by arguments to the 
-                        predicate
+                        predicate. If the --dir option is used, the main-file 
+                        should be a relative path starting at DIR
 
 Optional arguments:
   -h, --help            Show this help message and exit.
@@ -78,7 +79,8 @@ Optional arguments:
   --replay REPLAY       file to replay recording from
   --errmsg ERRMSG       substring in stderr to look for
   --msg MSG             substring in stdout to look for
-  --dir DIR             directory to reduce (should contain the main file!)
+  --dir DIR             absolute path to the directory to reduce (should 
+                        contain the main file!)
   --out OUT             directory to move the minimized output to
 ```
 
