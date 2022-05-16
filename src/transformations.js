@@ -1,4 +1,4 @@
-const esprima = require("esprima"),
+const esprima = require("espree"),
     fs = require("fs-extra"),
     cp = require("child_process"),
     util = require("util"),
@@ -25,7 +25,7 @@ function transformAndTest(transformation, options, state, file) {
 
     function getFileCodeSize(sourceFile) {
         // The only reliable way of comparing transformed code sizes is to pretty print them in the same way
-        return file_util.pp({ext: "js", ast: esprima.parse(fs.readFileSync(sourceFile))}).length;
+        return file_util.pp({ext: "js", ast: esprima.parse(fs.readFileSync(sourceFile), {ecmaVersion:'latest'})}).length;
     }
 
     try {

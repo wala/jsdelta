@@ -3,7 +3,7 @@ const fs = require("fs-extra"),
     tmp = require("tmp"),
     escodegen = require("escodegen"),
     config = require("../config"),
-    esprima = require("esprima");
+    esprima = require("espree");
 // get name of current test case
 function getTempFileName(state) {
     var fn = state.tmp_dir + "/delta_js_" + state.round + "." + state.ext;
@@ -40,7 +40,7 @@ function pp(state) {
 
 function parse(input) {
     try {
-        return esprima.parse(input);
+        return esprima.parse(input, {ecmaVersion:'latest'});
     } catch (e) {
         throw e;
     }

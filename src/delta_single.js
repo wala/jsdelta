@@ -1,6 +1,6 @@
 var fs = require("fs-extra"),
     util = require("util"),
-    esprima = require("esprima"),
+    esprima = require("espree"),
     escodegen = require("escodegen"),
     estraverse = require("estraverse"),
     tmp = require("tmp"),
